@@ -1,0 +1,286 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#fafafa] text-neutral-900 font-sans antialiased transition-colors duration-200;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    @apply tracking-tight;
+  }
+}
+
+/* Custom Minimalist Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #f4f4f5;
+}
+::-webkit-scrollbar-thumb {
+  background: #d4d4d8;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1aa;
+}
+
+/* Minimalist Clean Cards & Panels */
+.glass-panel {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03);
+}
+
+.glass-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+  border-color: #171717;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.06), 0 4px 6px -4px rgba(0, 0, 0, 0.03);
+}
+
+.gold-gradient-text {
+  color: #171717;
+  font-weight: 800;
+}
+
+/* =========================================================
+   DARK THEME SYSTEM (Minimalist Luxury Dark Palette)
+   ========================================================= */
+.dark body {
+  background-color: #09090b !important;
+  color: #f4f4f5 !important;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #18181b;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #52525b;
+}
+
+/* Dark mode surface backgrounds */
+.dark .bg-\[\#fafafa\],
+.dark .bg-\[\#f6f6f7\],
+.dark main {
+  background-color: #09090b !important;
+  color: #f4f4f5 !important;
+}
+
+.dark aside,
+.dark .bg-white {
+  background-color: #121214 !important;
+  color: #f4f4f5 !important;
+}
+
+.dark .bg-neutral-50,
+.dark .bg-neutral-50\/50,
+.dark .bg-neutral-50\/60,
+.dark .bg-neutral-50\/70,
+.dark .bg-neutral-100 {
+  background-color: #18181b !important;
+  color: #f4f4f5 !important;
+}
+
+/* Dark mode text colors */
+.dark .text-neutral-900,
+.dark .text-neutral-800,
+.dark .text-neutral-700 {
+  color: #f4f4f5 !important;
+}
+
+.dark .text-neutral-600,
+.dark .text-neutral-500 {
+  color: #a1a1aa !important;
+}
+
+.dark .text-neutral-400 {
+  color: #71717a !important;
+}
+
+/* Dark mode borders */
+.dark .border-neutral-100,
+.dark .border-neutral-200,
+.dark .border-neutral-200\/60,
+.dark .border-neutral-200\/80,
+.dark .border-neutral-200\/90,
+.dark .border-neutral-300 {
+  border-color: #27272a !important;
+}
+
+/* Dark mode inputs and controls */
+.dark input:not([type="checkbox"]),
+.dark textarea,
+.dark select {
+  background-color: #18181b !important;
+  color: #f4f4f5 !important;
+  border-color: #27272a !important;
+}
+
+.dark input:not([type="checkbox"]):focus,
+.dark textarea:focus,
+.dark select:focus {
+  border-color: #ffffff !important;
+}
+
+/* Dark mode tables */
+.dark table thead {
+  background-color: #18181b !important;
+  color: #a1a1aa !important;
+}
+
+.dark .divide-neutral-100 > :not([hidden]) ~ :not([hidden]),
+.dark .divide-neutral-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #27272a !important;
+}
+
+.dark .hover\:bg-neutral-50:hover,
+.dark .hover\:bg-neutral-50\/80:hover,
+.dark .hover\:bg-neutral-100:hover,
+.dark .hover\:bg-neutral-100\/80:hover {
+  background-color: #1e1e24 !important;
+}
+
+/* Dark mode button contrasts */
+.dark .bg-black {
+  background-color: #ffffff !important;
+  color: #09090b !important;
+}
+
+.dark .hover\:bg-neutral-800:hover {
+  background-color: #e4e4e7 !important;
+}
+
+/* Badges and pills in dark mode */
+.dark .bg-\[\#c6f6d5\] {
+  background-color: #064e3b !important;
+  color: #a7f3d0 !important;
+}
+
+.dark .bg-emerald-50 {
+  background-color: #064e3b !important;
+  color: #a7f3d0 !important;
+}
+
+.dark .hover\:bg-red-50:hover {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+}
+
+.dark .hover\:border-red-200:hover {
+  border-color: rgba(239, 68, 68, 0.35) !important;
+}
+
+/* =========================================================
+   POS THERMAL RECEIPT PRINT STYLING (80mm & 58mm Presets)
+   ========================================================= */
+@media print {
+  @page {
+    margin: 0;
+    size: auto;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* Unconstrain viewport / scroll wrappers so print doesn't clip */
+  #root,
+  .min-h-screen,
+  main {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* Override dark mode text colors in print so text is never white */
+  body,
+  body *,
+  .dark,
+  .dark * {
+    color: #000000 !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Hide everything except printable receipt or report */
+  body * {
+    visibility: hidden;
+  }
+
+  .printable-receipt-area,
+  .printable-receipt-area *,
+  .printable-zreport-area,
+  .printable-zreport-area * {
+    visibility: visible !important;
+  }
+
+  .printable-receipt-area,
+  .printable-zreport-area {
+    position: fixed !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 2mm 3mm !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: none !important;
+    box-shadow: none !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    z-index: 999999 !important;
+  }
+
+  /* 80mm Standard POS Thermal Paper Roll (approx 72mm printable width) */
+  .printable-receipt-area.thermal-80mm,
+  .printable-zreport-area.thermal-80mm {
+    max-width: 76mm !important;
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+  }
+
+  /* 58mm Mini Pocket / Bluetooth Thermal Paper Roll (approx 48mm printable width) */
+  .printable-receipt-area.thermal-58mm,
+  .printable-zreport-area.thermal-58mm {
+    max-width: 50mm !important;
+    font-size: 9.5px !important;
+    line-height: 1.25 !important;
+    padding: 1mm 2mm !important;
+  }
+
+  /* Inverted black pill text inside receipt */
+  .printable-receipt-area .bg-black,
+  .printable-receipt-area .bg-black *,
+  .printable-zreport-area .bg-black,
+  .printable-zreport-area .bg-black * {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+  }
+
+  .no-print,
+  .no-print * {
+    display: none !important;
+    visibility: hidden !important;
+  }
+}
