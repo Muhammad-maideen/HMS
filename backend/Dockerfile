@@ -9,12 +9,14 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     libzip-dev \
     libpq-dev \
+    sqlite3 \
+    libsqlite3-dev \
     zip \
     unzip \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions required by Laravel (MySQL + PostgreSQL + GD + Zip + BCMath)
-RUN docker-php-ext-install pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd zip
+# Install PHP extensions required by Laravel (MySQL + PostgreSQL + SQLite + GD + Zip + BCMath)
+RUN docker-php-ext-install pdo_mysql pdo_pgsql pdo_sqlite mbstring exif pcntl bcmath gd zip
 
 # Enable Apache rewrite module
 RUN a2enmod rewrite
@@ -35,13 +37,15 @@ COPY . .
 # Install Composer production dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Set up storage and cache directories with proper permissions
+# Set up storage, cache, and database directories with proper permissions
 RUN mkdir -p /var/www/html/storage/framework/sessions \
     /var/www/html/storage/framework/views \
     /var/www/html/storage/framework/cache \
     /var/www/html/bootstrap/cache \
-    && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
-    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+    /var/www/html/database \
+    && touch /var/www/html/database/database.sqlite \
+    && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database \
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
 
 # Make entrypoint executable
 RUN chmod +x /var/www/html/entrypoint.sh
