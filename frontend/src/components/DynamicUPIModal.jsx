@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import QRCode from 'qrcode';
-import { X } from 'lucide-react';
+import { X, QrCode, Edit2, Check, Smartphone, AlertCircle, RotateCcw } from 'lucide-react';
 import { posAudio } from '../utils/posAudio';
 
 // Confetti burst particles matching user reference (stars, dots, diamonds, rectangles)
@@ -58,18 +58,24 @@ export default function DynamicUPIModal({
   const timerRef1 = useRef(null);
   const timerRef2 = useRef(null);
 
+  // Fresh UPI ID and restaurant name loaded from customer's own storage
   const [upiId, setUpiId] = useState(() => {
-    return localStorage.getItem('hms_upi_id') || 'starbiriyani@okhdfcbank';
+    return localStorage.getItem('hms_upi_id') || '';
   });
   const [restaurantName, setRestaurantName] = useState(() => {
-    return localStorage.getItem('hms_restaurant_name') || 'Star Biriyani';
+    return localStorage.getItem('hms_restaurant_name') || 'Restaurant';
   });
+
+  // Inline UPI editing state for new customer setup
+  const [isEditingUpi, setIsEditingUpi] = useState(false);
+  const [tempUpiInput, setTempUpiInput] = useState('');
+  const [upiError, setUpiError] = useState('');
 
   // Sync UPI ID & Restaurant Name from events & storage
   useEffect(() => {
     const handleSync = () => {
-      setUpiId(localStorage.getItem('hms_upi_id') || 'starbiriyani@okhdfcbank');
-      setRestaurantName(localStorage.getItem('hms_restaurant_name') || 'Star Biriyani');
+      setUpiId(localStorage.getItem('hms_upi_id') || '');
+      setRestaurantName(localStorage.getItem('hms_restaurant_name') || 'Restaurant');
     };
     window.addEventListener('storage', handleSync);
     window.addEventListener('hms_upi_updated', handleSync);
@@ -81,18 +87,51 @@ export default function DynamicUPIModal({
     };
   }, []);
 
-  const upiUri = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(restaurantName)}&am=${amount.toFixed(2)}&tr=${orderNumber}&cu=INR`;
+  const cleanUpi = upiId.trim();
+  const upiUri = cleanUpi 
+    ? `upi://pay?pa=${encodeURIComponent(cleanUpi)}&pn=${encodeURIComponent(restaurantName)}&am=${amount.toFixed(2)}&tr=${orderNumber}&cu=INR`
+    : '';
 
   // Reset state on open
   useEffect(() => {
     if (isOpen) {
       setPaymentState('scan');
-      setUpiId(localStorage.getItem('hms_upi_id') || 'starbiriyani@okhdfcbank');
-      setRestaurantName(localStorage.getItem('hms_restaurant_name') || 'Star Biriyani');
+      const storedUpi = localStorage.getItem('hms_upi_id') || '';
+      setUpiId(storedUpi);
+      setRestaurantName(localStorage.getItem('hms_restaurant_name') || 'Restaurant');
+      setIsEditingUpi(!storedUpi);
+      setTempUpiInput(storedUpi);
+      setUpiError('');
       if (timerRef1.current) clearTimeout(timerRef1.current);
       if (timerRef2.current) clearTimeout(timerRef2.current);
     }
   }, [isOpen]);
+
+  const handleSaveInlineUpi = (e) => {
+    if (e) e.preventDefault();
+    const trimmed = tempUpiInput.trim();
+    if (!trimmed) {
+      setUpiError('Please enter a valid UPI ID (e.g. restaurant@okaxis)');
+      return;
+    }
+    if (!trimmed.includes('@')) {
+      setUpiError('UPI ID must include @bankhandle (e.g. @okaxis, @paytm, @upi)');
+      return;
+    }
+    setUpiError('');
+    localStorage.setItem('hms_upi_id', trimmed);
+    setUpiId(trimmed);
+    window.dispatchEvent(new Event('hms_upi_updated'));
+    setIsEditingUpi(false);
+  };
+
+  const handleClearInlineUpi = () => {
+    localStorage.removeItem('hms_upi_id');
+    setUpiId('');
+    setTempUpiInput('');
+    window.dispatchEvent(new Event('hms_upi_updated'));
+    setIsEditingUpi(true);
+  };
 
   // Generate QR Code
   useEffect(() => {
@@ -290,63 +329,163 @@ export default function DynamicUPIModal({
         )}
 
         {/* ====================================================
-            MODE 1: SCANNER & TOTAL AMOUNT ONLY
+            MODE 1: SCANNER & TOTAL AMOUNT ONLY OR INLINE UPI SETUP
             ==================================================== */}
         {paymentState === 'scan' && (
           <div className="space-y-4 pt-1 animate-fadeIn">
             
-            {/* Restaurant Name Header & Configured UPI ID */}
-            <div className="space-y-1">
-              <h3 className="text-xl font-black text-neutral-900 tracking-tight">
-                {restaurantName}
-              </h3>
-              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-neutral-100 text-neutral-800 text-[11px] font-mono font-bold border border-neutral-200">
-                <span className="text-neutral-400 font-sans font-semibold">UPI ID:</span>
-                <span className="text-neutral-900">{upiId}</span>
-              </div>
-            </div>
-
-            {/* Total Amount to Pay */}
-            <div className="py-2 px-4 rounded-2xl bg-neutral-50 border border-neutral-200/80 space-y-0.5">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">
-                Total Amount
-              </span>
-              <div className="text-3xl sm:text-4xl font-black font-mono tracking-tight text-neutral-900">
-                ₹{amount.toFixed(2)}
-              </div>
-            </div>
-
-            {/* Scanner (QR Code) - Clickable to trigger payment */}
-            <div 
-              onClick={handleTriggerPayment}
-              className="relative p-4 bg-white rounded-2xl border-2 border-neutral-200 hover:border-black transition-all cursor-pointer group shadow-sm flex flex-col items-center justify-center min-h-[250px]"
-              title="Click scanner or press Enter once paid"
-            >
-              {loading ? (
-                <div className="space-y-2 text-center py-10">
-                  <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin mx-auto" />
-                  <p className="text-xs text-neutral-400 font-medium">Generating QR...</p>
+            {/* If UPI is not configured OR user clicked Edit UPI */}
+            {(!cleanUpi || isEditingUpi) ? (
+              <div className="p-4 bg-neutral-50 rounded-2xl border border-neutral-200 text-left space-y-3">
+                <div className="flex items-center gap-2 text-neutral-900 font-bold text-sm">
+                  <div className="w-8 h-8 rounded-lg bg-black text-white flex items-center justify-center">
+                    <Smartphone className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="leading-tight">{cleanUpi ? 'Update Merchant UPI ID' : 'Setup Merchant UPI QR'}</h4>
+                    <span className="text-[10px] text-neutral-500 font-normal">Active for instant QR bill payments</span>
+                  </div>
                 </div>
-              ) : qrDataUrl ? (
-                <div className="relative inline-block">
-                  <img
-                    src={qrDataUrl}
-                    alt="UPI QR Code"
-                    className="w-56 h-56 object-contain rounded-xl transition-transform group-hover:scale-101"
-                  />
-                  {/* Subtle animated laser scan bar */}
-                  <div className="absolute left-2 right-2 h-0.5 bg-black/60 shadow-[0_0_8px_rgba(0,0,0,0.6)] animate-upi-laser pointer-events-none" />
-                </div>
-              ) : (
-                <div className="text-xs text-red-500 py-10">Failed to render QR Code</div>
-              )}
 
-              {/* Minimalist interactive hint */}
-              <div className="pt-2 text-[11px] font-semibold text-neutral-500 group-hover:text-black transition-colors flex items-center justify-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span>Tap scanner or press Enter once paid</span>
+                <form onSubmit={handleSaveInlineUpi} className="space-y-2.5">
+                  <div>
+                    <label className="block text-[11px] font-bold text-neutral-700 mb-1">
+                      Merchant UPI ID / VPA
+                    </label>
+                    <input
+                      type="text"
+                      value={tempUpiInput}
+                      onChange={(e) => {
+                        setTempUpiInput(e.target.value);
+                        setUpiError('');
+                      }}
+                      placeholder="e.g. restaurant@okaxis or 9876543210@paytm"
+                      autoFocus
+                      className="w-full px-3 py-2 text-xs font-mono font-bold border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-black bg-white"
+                    />
+                    {upiError && (
+                      <p className="text-[10px] text-rose-500 font-semibold mt-1 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        <span>{upiError}</span>
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Bank handle quick chips */}
+                  <div className="flex flex-wrap gap-1">
+                    {['@okaxis', '@paytm', '@okhdfcbank', '@upi', '@ybl'].map((h) => (
+                      <button
+                        key={h}
+                        type="button"
+                        onClick={() => {
+                          const base = tempUpiInput ? (tempUpiInput.includes('@') ? tempUpiInput.split('@')[0] : tempUpiInput) : 'merchant';
+                          setTempUpiInput(`${base}${h}`);
+                          setUpiError('');
+                        }}
+                        className="px-2 py-0.5 text-[10px] bg-white border border-neutral-200 rounded-md hover:border-black font-mono transition-colors cursor-pointer"
+                      >
+                        {h}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-1">
+                    <button
+                      type="submit"
+                      className="flex-1 py-2 px-3 bg-neutral-900 hover:bg-black text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+                    >
+                      <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                      <span>Save & Generate QR</span>
+                    </button>
+                    {cleanUpi && (
+                      <button
+                        type="button"
+                        onClick={() => setIsEditingUpi(false)}
+                        className="py-2 px-3 bg-neutral-200 hover:bg-neutral-300 text-neutral-800 text-xs font-bold rounded-xl cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                    {cleanUpi && (
+                      <button
+                        type="button"
+                        onClick={handleClearInlineUpi}
+                        className="p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-xl cursor-pointer"
+                        title="Clear UPI ID"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                </form>
               </div>
-            </div>
+            ) : (
+              <>
+                {/* Restaurant Name Header & Configured UPI ID */}
+                <div className="space-y-1">
+                  <h3 className="text-xl font-black text-neutral-900 tracking-tight">
+                    {restaurantName}
+                  </h3>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-neutral-100 text-neutral-800 text-[11px] font-mono font-bold border border-neutral-200">
+                    <span className="text-neutral-400 font-sans font-semibold">UPI ID:</span>
+                    <span className="text-neutral-900">{cleanUpi}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTempUpiInput(cleanUpi);
+                        setIsEditingUpi(true);
+                      }}
+                      className="ml-1 text-neutral-400 hover:text-black p-0.5 rounded cursor-pointer transition-colors"
+                      title="Edit UPI ID"
+                    >
+                      <Edit2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Total Amount to Pay */}
+                <div className="py-2 px-4 rounded-2xl bg-neutral-50 border border-neutral-200/80 space-y-0.5">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">
+                    Total Amount
+                  </span>
+                  <div className="text-3xl sm:text-4xl font-black font-mono tracking-tight text-neutral-900">
+                    ₹{amount.toFixed(2)}
+                  </div>
+                </div>
+
+                {/* Scanner (QR Code) - Clickable to trigger payment */}
+                <div 
+                  onClick={handleTriggerPayment}
+                  className="relative p-4 bg-white rounded-2xl border-2 border-neutral-200 hover:border-black transition-all cursor-pointer group shadow-sm flex flex-col items-center justify-center min-h-[250px]"
+                  title="Click scanner or press Enter once paid"
+                >
+                  {loading ? (
+                    <div className="space-y-2 text-center py-10">
+                      <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin mx-auto" />
+                      <p className="text-xs text-neutral-400 font-medium">Generating QR...</p>
+                    </div>
+                  ) : qrDataUrl ? (
+                    <div className="relative inline-block">
+                      <img
+                        src={qrDataUrl}
+                        alt="UPI QR Code"
+                        className="w-56 h-56 object-contain rounded-xl transition-transform group-hover:scale-101"
+                      />
+                      {/* Subtle animated laser scan bar */}
+                      <div className="absolute left-2 right-2 h-0.5 bg-black/60 shadow-[0_0_8px_rgba(0,0,0,0.6)] animate-upi-laser pointer-events-none" />
+                    </div>
+                  ) : (
+                    <div className="text-xs text-red-500 py-10">Failed to render QR Code</div>
+                  )}
+
+                  {/* Minimalist interactive hint */}
+                  <div className="pt-2 text-[11px] font-semibold text-neutral-500 group-hover:text-black transition-colors flex items-center justify-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>Tap scanner or press Enter once paid</span>
+                  </div>
+                </div>
+              </>
+            )}
 
           </div>
         )}

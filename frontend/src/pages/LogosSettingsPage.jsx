@@ -54,9 +54,9 @@ export default function LogosSettingsPage() {
     return localStorage.getItem('hms_print_restaurant_name') !== 'false';
   });
 
-  // Merchant UPI ID for Dynamic QR Scanner
+  // Merchant UPI ID for Dynamic QR Scanner (empty by default for clean customer onboarding)
   const [upiId, setUpiId] = useState(() => {
-    return localStorage.getItem('hms_upi_id') || 'starbiriyani@okhdfcbank';
+    return localStorage.getItem('hms_upi_id') || '';
   });
   const [previewQrUrl, setPreviewQrUrl] = useState('');
   const [showTestUPIModal, setShowTestUPIModal] = useState(false);
@@ -66,8 +66,13 @@ export default function LogosSettingsPage() {
 
   // Generate live preview QR code for the settings card
   useEffect(() => {
-    const cleanUpi = upiId.trim() || 'starbiriyani@okhdfcbank';
-    const upiUri = `upi://pay?pa=${cleanUpi}&pn=${encodeURIComponent(restaurantName || 'Star Biriyani')}&am=104.00&tr=DEMO-SETTINGS&cu=INR`;
+    const cleanUpi = upiId.trim();
+    if (!cleanUpi) {
+      setPreviewQrUrl('');
+      return;
+    }
+
+    const upiUri = `upi://pay?pa=${encodeURIComponent(cleanUpi)}&pn=${encodeURIComponent(restaurantName || 'Restaurant')}&am=104.00&tr=DEMO-SETTINGS&cu=INR`;
     QRCode.toDataURL(upiUri, {
       width: 200,
       margin: 1.5,
@@ -83,10 +88,10 @@ export default function LogosSettingsPage() {
     const syncAllSettings = () => {
       setAdminLogo(localStorage.getItem('hms_restaurant_logo') || '');
       setReceiptLogo(localStorage.getItem('hms_receipt_logo') || '');
-      setRestaurantName(localStorage.getItem('hms_restaurant_name') || 'Star Biriyani');
+      setRestaurantName(localStorage.getItem('hms_restaurant_name') || 'Restaurant');
       setPrintReceiptLogo(localStorage.getItem('hms_print_receipt_logo') !== 'false');
       setPrintRestaurantName(localStorage.getItem('hms_print_restaurant_name') !== 'false');
-      setUpiId(localStorage.getItem('hms_upi_id') || 'starbiriyani@okhdfcbank');
+      setUpiId(localStorage.getItem('hms_upi_id') || '');
       setAdminLogoError(false);
       setReceiptLogoError(false);
     };
@@ -113,7 +118,7 @@ export default function LogosSettingsPage() {
   };
 
   const handleSaveRestaurantName = () => {
-    const trimmed = restaurantName.trim() || 'Star Biriyani';
+    const trimmed = restaurantName.trim() || 'Restaurant';
     setRestaurantName(trimmed);
     localStorage.setItem('hms_restaurant_name', trimmed);
     window.dispatchEvent(new Event('hms_receipt_settings_updated'));
@@ -121,34 +126,37 @@ export default function LogosSettingsPage() {
   };
 
   const handleResetRestaurantName = () => {
-    const defaultName = 'Star Biriyani';
+    const defaultName = localStorage.getItem('hms_restaurant_name') || 'Restaurant';
     setRestaurantName(defaultName);
     localStorage.setItem('hms_restaurant_name', defaultName);
     window.dispatchEvent(new Event('hms_receipt_settings_updated'));
-    addToast('Hotel Name reset to Star Biriyani', 'info');
+    addToast('Hotel Name refreshed', 'info');
   };
 
   // UPI ID Handlers
   const handleUpdateUpiId = (val) => {
     setUpiId(val);
-    localStorage.setItem('hms_upi_id', val);
-    window.dispatchEvent(new Event('hms_upi_updated'));
   };
 
   const handleSaveUpiId = () => {
-    const trimmed = upiId.trim() || 'starbiriyani@okhdfcbank';
+    const trimmed = upiId.trim();
     setUpiId(trimmed);
-    localStorage.setItem('hms_upi_id', trimmed);
-    window.dispatchEvent(new Event('hms_upi_updated'));
-    addToast(`Merchant UPI ID saved: ${trimmed}. Scanner updated!`, 'success');
+    if (trimmed) {
+      localStorage.setItem('hms_upi_id', trimmed);
+      window.dispatchEvent(new Event('hms_upi_updated'));
+      addToast(`Merchant UPI ID saved: ${trimmed}. Terminal QR active!`, 'success');
+    } else {
+      localStorage.removeItem('hms_upi_id');
+      window.dispatchEvent(new Event('hms_upi_updated'));
+      addToast('Merchant UPI ID cleared. Enter a new UPI ID to enable QR payments.', 'info');
+    }
   };
 
-  const handleResetUpiId = () => {
-    const defaultUpi = 'starbiriyani@okhdfcbank';
-    setUpiId(defaultUpi);
-    localStorage.setItem('hms_upi_id', defaultUpi);
+  const handleClearUpiId = () => {
+    setUpiId('');
+    localStorage.removeItem('hms_upi_id');
     window.dispatchEvent(new Event('hms_upi_updated'));
-    addToast('UPI ID reset to starbiriyani@okhdfcbank', 'info');
+    addToast('Merchant UPI ID cleared.', 'info');
   };
 
   // Toggle Print Receipt Logo Option
@@ -534,15 +542,19 @@ export default function LogosSettingsPage() {
                   <Smartphone className="w-3.5 h-3.5 text-neutral-500" />
                   <span>Merchant UPI ID / VPA</span>
                 </label>
-                <button
-                  type="button"
-                  onClick={handleResetUpiId}
-                  className="text-[11px] text-neutral-500 hover:text-black flex items-center gap-1 cursor-pointer transition-colors"
-                  title="Reset to default"
-                >
-                  <RotateCcw className="w-3 h-3" />
-                  <span>Reset Default</span>
-                </button>
+                {upiId ? (
+                  <button
+                    type="button"
+                    onClick={handleClearUpiId}
+                    className="text-[11px] text-rose-600 hover:text-rose-700 flex items-center gap-1 cursor-pointer transition-colors font-medium"
+                    title="Clear UPI ID"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    <span>Clear UPI ID</span>
+                  </button>
+                ) : (
+                  <span className="text-[10px] text-neutral-400 italic">Unconfigured</span>
+                )}
               </div>
 
               <div className="flex gap-2">
@@ -550,9 +562,9 @@ export default function LogosSettingsPage() {
                   type="text"
                   value={upiId}
                   onChange={(e) => handleUpdateUpiId(e.target.value)}
-                  onBlur={handleSaveUpiId}
-                  placeholder="e.g. starbiriyani@okhdfcbank or merchant@upi"
-                  className="flex-1 px-3.5 py-2.5 rounded-xl border border-neutral-200 bg-neutral-50/60 text-neutral-900 text-sm font-mono font-bold focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition-all"
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleSaveUpiId(); }}
+                  placeholder="e.g. yourcafe@okaxis, merchant@paytm or 9876543210@upi"
+                  className="flex-1 px-3.5 py-2.5 rounded-xl border border-neutral-200 bg-neutral-50/60 text-neutral-900 text-sm font-mono font-bold focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition-all placeholder:text-neutral-400 placeholder:font-normal placeholder:font-sans"
                 />
                 <button
                   type="button"
@@ -566,17 +578,23 @@ export default function LogosSettingsPage() {
 
               {/* Validation info */}
               <div className="flex items-center justify-between text-[11px] pt-0.5">
-                {upiId.includes('@') ? (
+                {!upiId ? (
+                  <span className="text-neutral-400">
+                    Enter your merchant VPA to generate your instant payment QR
+                  </span>
+                ) : upiId.includes('@') ? (
                   <span className="text-emerald-600 font-semibold flex items-center gap-1">
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     <span>Valid UPI VPA format</span>
                   </span>
                 ) : (
                   <span className="text-amber-600 font-semibold">
-                    Must include bank handle (e.g. @okhdfcbank, @paytm, @upi)
+                    Must include bank handle (e.g. @okaxis, @paytm, @upi)
                   </span>
                 )}
-                <span className="text-neutral-400 font-mono text-[10px]">Active on POS</span>
+                <span className="text-neutral-400 font-mono text-[10px]">
+                  {upiId ? 'Active on POS' : 'Inactive on POS'}
+                </span>
               </div>
 
               <p className="text-[11px] text-neutral-500">
@@ -595,7 +613,7 @@ export default function LogosSettingsPage() {
                     key={handle}
                     type="button"
                     onClick={() => {
-                      const base = upiId.split('@')[0] || 'starbiriyani';
+                      const base = upiId ? (upiId.includes('@') ? upiId.split('@')[0] : upiId) : 'mybusiness';
                       handleUpdateUpiId(`${base}${handle}`);
                     }}
                     className="px-2 py-1 text-[11px] bg-white border border-neutral-200 hover:border-black rounded-lg font-mono text-neutral-700 hover:text-black transition-all cursor-pointer shadow-2xs"
@@ -627,12 +645,14 @@ export default function LogosSettingsPage() {
             {/* Simulated Scanner Display */}
             <div className="bg-white border border-neutral-200 rounded-xl p-4 shadow-2xs space-y-2.5 text-center">
               <div className="font-sans font-bold text-sm text-neutral-900">
-                {restaurantName || 'Star Biriyani'}
+                {restaurantName || 'Restaurant'}
               </div>
 
               <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-neutral-100 text-neutral-800 text-[10px] font-mono font-bold border border-neutral-200">
                 <span className="text-neutral-400 font-sans">UPI ID:</span>
-                <span>{upiId}</span>
+                <span className={upiId ? 'text-neutral-900' : 'text-neutral-400 italic'}>
+                  {upiId || 'Not Configured'}
+                </span>
               </div>
 
               <div className="py-1 px-2 rounded-lg bg-neutral-50 border border-neutral-200/80 font-sans">
@@ -645,8 +665,11 @@ export default function LogosSettingsPage() {
                 {previewQrUrl ? (
                   <img src={previewQrUrl} alt="Preview QR" className="w-32 h-32 object-contain" />
                 ) : (
-                  <div className="w-32 h-32 flex items-center justify-center text-[10px] text-neutral-400">
-                    Generating...
+                  <div className="w-32 h-32 flex flex-col items-center justify-center p-2 text-center text-neutral-400 bg-neutral-100/50 rounded-lg border border-dashed border-neutral-300">
+                    <QrCode className="w-7 h-7 text-neutral-300 mb-1" />
+                    <span className="text-[10px] font-sans font-medium text-neutral-400">
+                      Enter UPI ID to preview QR
+                    </span>
                   </div>
                 )}
               </div>
