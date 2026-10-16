@@ -8,44 +8,79 @@ import {
   ShieldCheck, 
   Sparkles,
   KeyRound,
+  Building2,
+  Mail,
   CheckCircle2,
-  UtensilsCrossed
+  UtensilsCrossed,
+  UserPlus,
+  LogIn,
+  Store,
+  ChevronRight
 } from 'lucide-react';
 import { setRole } from '../services/api';
 import { useToast } from '../context/ToastContext';
 import ThemeToggleBtn from '../components/ThemeToggleBtn';
 
+const DEFAULT_SEED_TENANTS = [
+  {
+    id: 'tenant-master',
+    restaurantName: 'AL RIZQ ELITE',
+    ownerName: 'Admin Owner',
+    username: 'admin',
+    email: 'admin@alrizq.com',
+    password: 'admin',
+    role: 'admin',
+  }
+];
+
 export default function LoginPage({ onLoginSuccess }) {
   const { addToast } = useToast();
 
-  const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('admin123');
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  // Mode: 'login' | 'register'
+  const [authMode, setAuthMode] = useState('login');
+
+  // Login form state (empty by default for real customer use)
+  const [loginIdentifier, setLoginIdentifier] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
 
-  // Quick-fill credentials for easy role access
-  const demoAccounts = [
-    { label: 'Admin', user: 'admin', pass: 'admin123', role: 'admin', desc: 'Full System Control' },
-    { label: 'Manager', user: 'manager', pass: 'manager123', role: 'manager', desc: 'Menu & Stock Admin' },
-    { label: 'Cashier', user: 'cashier', pass: 'cashier123', role: 'cashier', desc: 'POS Orders & Billing' },
-  ];
+  // Register form state (for new SaaS customers)
+  const [restaurantName, setRestaurantName] = useState('');
+  const [ownerName, setOwnerName] = useState('');
+  const [registerEmail, setRegisterEmail] = useState('');
+  const [registerUsername, setRegisterUsername] = useState('');
+  const [registerPassword, setRegisterPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
 
-  const handleQuickFill = (acc) => {
-    setUsername(acc.user);
-    setPassword(acc.pass);
-    addToast(`Filled credentials for ${acc.label}`, 'info');
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Get all registered tenants from storage
+  const getTenants = () => {
+    try {
+      const raw = localStorage.getItem('hms_registered_tenants');
+      if (!raw) {
+        localStorage.setItem('hms_registered_tenants', JSON.stringify(DEFAULT_SEED_TENANTS));
+        return DEFAULT_SEED_TENANTS;
+      }
+      return JSON.parse(raw);
+    } catch {
+      return DEFAULT_SEED_TENANTS;
+    }
   };
 
+  // Handle Login for Existing Customer
   const handleLogin = (e) => {
     if (e) e.preventDefault();
 
-    if (!username.trim()) {
-      addToast('Please enter your username or email', 'error');
+    const cleanIdentifier = loginIdentifier.trim();
+    if (!cleanIdentifier) {
+      addToast('Please enter your username or registered email', 'error');
       return;
     }
 
-    if (!password) {
+    if (!loginPassword) {
       addToast('Please enter your password', 'error');
       return;
     }
@@ -53,52 +88,178 @@ export default function LoginPage({ onLoginSuccess }) {
     setIsLoading(true);
 
     setTimeout(() => {
-      // Determine role from username or default to admin
-      let userRole = 'admin';
-      const cleanUser = username.trim().toLowerCase();
-      if (cleanUser.includes('cashier')) {
-        userRole = 'cashier';
-      } else if (cleanUser.includes('manager')) {
-        userRole = 'manager';
-      } else if (cleanUser.includes('kitchen')) {
-        userRole = 'kitchen';
+      const tenants = getTenants();
+      const lowerId = cleanIdentifier.toLowerCase();
+
+      // Find tenant matching username or email
+      const matchedTenant = tenants.find(
+        (t) => (t.username && t.username.toLowerCase() === lowerId) || 
+               (t.email && t.email.toLowerCase() === lowerId)
+      );
+
+      // Check credentials (allows matching tenant password or master admin fallback)
+      const isMasterAdmin = (lowerId === 'admin' && (loginPassword === 'admin' || loginPassword === 'admin123'));
+      const isTenantValid = matchedTenant && matchedTenant.password === loginPassword;
+
+      if (!isTenantValid && !isMasterAdmin) {
+        setIsLoading(false);
+        addToast('Invalid credentials. Check your username/password or register below.', 'error');
+        return;
       }
 
+      const activeTenant = matchedTenant || {
+        id: 'tenant-master',
+        restaurantName: localStorage.getItem('hms_restaurant_name') || 'AL RIZQ ELITE',
+        ownerName: cleanIdentifier,
+        username: cleanIdentifier,
+        email: `${cleanIdentifier}@software.local`,
+        role: cleanIdentifier.includes('cashier') ? 'cashier' : cleanIdentifier.includes('manager') ? 'manager' : 'admin',
+      };
+
+      // Set tenant session in storage
+      localStorage.setItem('hms_is_authenticated', 'true');
+      localStorage.setItem('hms_active_tenant_id', activeTenant.id);
+      localStorage.setItem('hms_restaurant_name', activeTenant.restaurantName);
+      localStorage.setItem('hms_user_name', activeTenant.ownerName || activeTenant.username);
+      localStorage.setItem('hms_user_email', activeTenant.email || `${activeTenant.username}@software.local`);
+
       const sessionData = {
-        username: username.trim(),
-        role: userRole,
+        tenantId: activeTenant.id,
+        restaurantName: activeTenant.restaurantName,
+        username: activeTenant.username,
+        role: activeTenant.role || 'admin',
         loginTime: new Date().toISOString(),
       };
 
-      // Save session
-      localStorage.setItem('hms_is_authenticated', 'true');
       localStorage.setItem('hms_auth_user', JSON.stringify(sessionData));
-      setRole(userRole);
+      setRole(activeTenant.role || 'admin');
+
+      // Dispatch events to update navbar & sidebar branding immediately
+      window.dispatchEvent(new Event('hms_logo_updated'));
+      window.dispatchEvent(new Event('hms_profile_updated'));
+      window.dispatchEvent(new Event('storage'));
 
       setIsLoading(false);
-      addToast(`Welcome, ${username.trim()}! Software unlocked.`, 'success');
+      addToast(`Welcome back, ${activeTenant.restaurantName}!`, 'success');
 
       if (onLoginSuccess) {
         onLoginSuccess(sessionData);
       }
-    }, 400);
+    }, 450);
+  };
+
+  // Handle Registration for New Customer
+  const handleRegister = (e) => {
+    if (e) e.preventDefault();
+
+    if (!restaurantName.trim()) {
+      addToast('Please enter your Restaurant or Cafe name', 'error');
+      return;
+    }
+    if (!ownerName.trim()) {
+      addToast('Please enter your full name', 'error');
+      return;
+    }
+    if (!registerEmail.trim() || !registerEmail.includes('@')) {
+      addToast('Please enter a valid email address', 'error');
+      return;
+    }
+    if (!registerUsername.trim()) {
+      addToast('Please choose a username for login', 'error');
+      return;
+    }
+    if (registerPassword.length < 4) {
+      addToast('Password must be at least 4 characters long', 'error');
+      return;
+    }
+    if (registerPassword !== confirmPassword) {
+      addToast('Passwords do not match. Please recheck.', 'error');
+      return;
+    }
+
+    setIsLoading(true);
+
+    setTimeout(() => {
+      const tenants = getTenants();
+      const lowerUsername = registerUsername.trim().toLowerCase();
+      const lowerEmail = registerEmail.trim().toLowerCase();
+
+      // Check if username or email already registered
+      const exists = tenants.some(
+        (t) => (t.username && t.username.toLowerCase() === lowerUsername) ||
+               (t.email && t.email.toLowerCase() === lowerEmail)
+      );
+
+      if (exists) {
+        setIsLoading(false);
+        addToast('This username or email is already registered. Please sign in.', 'error');
+        setAuthMode('login');
+        return;
+      }
+
+      // Create new tenant
+      const newTenant = {
+        id: `tenant-${Date.now()}`,
+        restaurantName: restaurantName.trim(),
+        ownerName: ownerName.trim(),
+        username: registerUsername.trim(),
+        email: registerEmail.trim().toLowerCase(),
+        password: registerPassword,
+        role: 'admin',
+        createdAt: new Date().toISOString(),
+      };
+
+      const updatedTenants = [...tenants, newTenant];
+      localStorage.setItem('hms_registered_tenants', JSON.stringify(updatedTenants));
+
+      // Set active session to this new restaurant
+      localStorage.setItem('hms_is_authenticated', 'true');
+      localStorage.setItem('hms_active_tenant_id', newTenant.id);
+      localStorage.setItem('hms_restaurant_name', newTenant.restaurantName);
+      localStorage.setItem('hms_user_name', newTenant.ownerName);
+      localStorage.setItem('hms_user_email', newTenant.email);
+
+      const sessionData = {
+        tenantId: newTenant.id,
+        restaurantName: newTenant.restaurantName,
+        username: newTenant.username,
+        role: 'admin',
+        loginTime: new Date().toISOString(),
+      };
+
+      localStorage.setItem('hms_auth_user', JSON.stringify(sessionData));
+      setRole('admin');
+
+      // Dispatch events so the UI updates
+      window.dispatchEvent(new Event('hms_logo_updated'));
+      window.dispatchEvent(new Event('hms_profile_updated'));
+      window.dispatchEvent(new Event('storage'));
+
+      setIsLoading(false);
+      addToast(`🎉 Account created! Welcome, ${newTenant.restaurantName}!`, 'success');
+
+      if (onLoginSuccess) {
+        onLoginSuccess(sessionData);
+      }
+    }, 550);
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#fafafa] dark:bg-[#09090b] text-neutral-900 dark:text-neutral-100 flex flex-col justify-between p-4 sm:p-6 transition-colors duration-200 font-sans selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black">
+    <div className="min-h-screen w-full bg-[#f8fafc] dark:bg-[#09090b] text-neutral-900 dark:text-neutral-100 flex flex-col justify-between p-4 sm:p-6 transition-colors duration-200 font-sans selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black">
       
-      {/* Top Bar with Theme Toggle */}
+      {/* Top Header */}
       <div className="w-full max-w-5xl mx-auto flex items-center justify-between py-2">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-black dark:bg-white text-white dark:text-black flex items-center justify-center font-black shadow-xs">
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 flex items-center justify-center font-black shadow-sm">
             <UtensilsCrossed className="w-4 h-4 stroke-[2.5]" />
           </div>
           <div>
             <span className="text-xs font-bold tracking-tight text-neutral-900 dark:text-white block leading-none">
-              RESTAURANT POS & RMS
+              RESTAURANT OS &bull; CLOUD POS
             </span>
-            <span className="text-[10px] text-neutral-400 font-mono">
-              Enterprise Suite v2.0
+            <span className="text-[10px] text-neutral-500 font-mono flex items-center gap-1.5 mt-0.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              Multi-Tenant SaaS v2.5
             </span>
           </div>
         </div>
@@ -106,145 +267,324 @@ export default function LoginPage({ onLoginSuccess }) {
         <ThemeToggleBtn />
       </div>
 
-      {/* Center Login Card Container */}
-      <div className="w-full max-w-md mx-auto my-auto animate-fadeIn">
+      {/* Main Card */}
+      <div className="w-full max-w-md mx-auto my-auto animate-fadeIn py-4">
         <div className="bg-white dark:bg-[#121214] border border-neutral-200/90 dark:border-neutral-800 rounded-2xl p-6 sm:p-8 shadow-xl space-y-6">
           
           {/* Card Header */}
           <div className="text-center space-y-1.5">
             <div className="w-12 h-12 rounded-2xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center mx-auto mb-3 shadow-2xs">
-              <KeyRound className="w-5 h-5 text-neutral-900 dark:text-white" />
+              {authMode === 'login' ? (
+                <KeyRound className="w-5 h-5 text-neutral-900 dark:text-white" />
+              ) : (
+                <Store className="w-5 h-5 text-neutral-900 dark:text-white" />
+              )}
             </div>
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 dark:text-white">
-              Sign In to Software
+              {authMode === 'login' ? 'Sign In to Your Restaurant' : 'Create Restaurant Account'}
             </h1>
             <p className="text-xs text-neutral-500 dark:text-neutral-400">
-              Enter your credentials to unlock terminal & management modules
+              {authMode === 'login' 
+                ? 'Enter your credentials to access your POS terminal & management suite'
+                : 'Set up your restaurant or cafe to get your private management portal'}
             </p>
           </div>
 
-          {/* Quick Demo Switcher */}
-          <div className="space-y-1.5">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 block text-center">
-              Quick One-Click Demo Logins
-            </span>
-            <div className="grid grid-cols-3 gap-2">
-              {demoAccounts.map((acc) => (
-                <button
-                  key={acc.role}
-                  type="button"
-                  onClick={() => handleQuickFill(acc)}
-                  className={`p-2 rounded-lg border text-xs font-semibold transition-all text-center ${
-                    username === acc.user
-                      ? 'border-black dark:border-white bg-black dark:bg-white text-white dark:text-black shadow-xs'
-                      : 'border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/60 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400'
-                  }`}
-                >
-                  <div className="font-bold text-[11px]">{acc.label}</div>
-                  <div className="text-[9px] opacity-70 font-mono">/{acc.user}</div>
-                </button>
-              ))}
-            </div>
+          {/* Segmented Mode Switcher (Sign In vs Register) */}
+          <div className="grid grid-cols-2 p-1 bg-neutral-100 dark:bg-neutral-900/80 rounded-xl border border-neutral-200 dark:border-neutral-800 text-xs font-semibold">
+            <button
+              type="button"
+              onClick={() => setAuthMode('login')}
+              className={`py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                authMode === 'login'
+                  ? 'bg-white dark:bg-[#1c1c20] text-neutral-900 dark:text-white shadow-xs font-bold'
+                  : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
+              }`}
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Sign In</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setAuthMode('register')}
+              className={`py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                authMode === 'register'
+                  ? 'bg-white dark:bg-[#1c1c20] text-neutral-900 dark:text-white shadow-xs font-bold'
+                  : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
+              }`}
+            >
+              <UserPlus className="w-3.5 h-3.5" />
+              <span>Register New</span>
+            </button>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleLogin} className="space-y-4">
-            
-            {/* Username / Email */}
-            <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-neutral-800 dark:text-neutral-200">
-                Username or Staff ID
-              </label>
-              <div className="relative">
-                <User className="w-4 h-4 text-neutral-400 absolute left-3.5 top-3" />
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="admin, manager, cashier..."
-                  required
-                  autoFocus
-                  className="w-full pl-10 pr-3.5 py-2.5 text-xs bg-white dark:bg-[#18181b] border border-neutral-300 dark:border-neutral-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-neutral-900 dark:text-white"
-                />
-              </div>
-            </div>
-
-            {/* Password */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
+          {/* SIGN IN FORM */}
+          {authMode === 'login' ? (
+            <form onSubmit={handleLogin} className="space-y-4">
+              
+              {/* Username or Email */}
+              <div className="space-y-1.5">
                 <label className="block text-xs font-bold text-neutral-800 dark:text-neutral-200">
-                  Password
+                  Username or Registered Email
                 </label>
-                <span className="text-[10px] text-neutral-400 hover:text-black dark:hover:text-white cursor-pointer">
-                  Default: any password
+                <div className="relative">
+                  <User className="w-4 h-4 text-neutral-400 absolute left-3.5 top-3" />
+                  <input
+                    type="text"
+                    value={loginIdentifier}
+                    onChange={(e) => setLoginIdentifier(e.target.value)}
+                    placeholder="e.g. admin or owner@myrestaurant.com"
+                    required
+                    autoFocus
+                    className="w-full pl-10 pr-3.5 py-2.5 text-xs bg-white dark:bg-[#18181b] border border-neutral-300 dark:border-neutral-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-neutral-900 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              {/* Password */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-neutral-800 dark:text-neutral-200">
+                    Password
+                  </label>
+                </div>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-neutral-400 absolute left-3.5 top-3" />
+                  <input
+                    type={showLoginPassword ? 'text' : 'password'}
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    placeholder="Enter your account password"
+                    required
+                    className="w-full pl-10 pr-10 py-2.5 text-xs bg-white dark:bg-[#18181b] border border-neutral-300 dark:border-neutral-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-neutral-900 dark:text-white font-mono"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowLoginPassword(!showLoginPassword)}
+                    className="absolute right-3 top-2.5 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 p-0.5"
+                    title={showLoginPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Remember Me & Security */}
+              <div className="flex items-center justify-between text-xs pt-1">
+                <label className="flex items-center gap-2 cursor-pointer text-neutral-600 dark:text-neutral-400">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="w-3.5 h-3.5 rounded text-black focus:ring-black cursor-pointer"
+                  />
+                  <span>Keep session active</span>
+                </label>
+
+                <span className="text-neutral-400 text-[11px] flex items-center gap-1 font-mono">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                  <span>Isolated Tenant</span>
                 </span>
               </div>
-              <div className="relative">
-                <Lock className="w-4 h-4 text-neutral-400 absolute left-3.5 top-3" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your security password"
-                  required
-                  className="w-full pl-10 pr-10 py-2.5 text-xs bg-white dark:bg-[#18181b] border border-neutral-300 dark:border-neutral-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-neutral-900 dark:text-white font-mono"
-                />
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full py-3 px-4 bg-neutral-900 dark:bg-white hover:bg-neutral-800 dark:hover:bg-neutral-100 text-white dark:text-neutral-900 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+              >
+                {isLoading ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-white/30 dark:border-black/30 border-t-white dark:border-t-black rounded-full animate-spin"></span>
+                    <span>Authenticating...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Sign In to Dashboard</span>
+                    <ArrowRight className="w-4 h-4 stroke-[2.5]" />
+                  </>
+                )}
+              </button>
+
+              {/* Switch to Register Link */}
+              <div className="pt-2 text-center">
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-2.5 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 p-0.5"
-                  title={showPassword ? 'Hide password' : 'Show password'}
+                  onClick={() => setAuthMode('register')}
+                  className="text-xs text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-colors cursor-pointer"
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  New customer? <strong className="underline underline-offset-4 text-neutral-900 dark:text-white font-semibold">Create your Restaurant account →</strong>
                 </button>
               </div>
-            </div>
 
-            {/* Remember Me */}
-            <div className="flex items-center justify-between text-xs pt-1">
-              <label className="flex items-center gap-2 cursor-pointer text-neutral-600 dark:text-neutral-400">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-3.5 h-3.5 rounded text-black focus:ring-black"
-                />
-                <span>Keep software session active</span>
-              </label>
+            </form>
+          ) : (
+            /* REGISTRATION FORM (NEW SAAS CUSTOMER) */
+            <form onSubmit={handleRegister} className="space-y-3.5">
+              
+              {/* Restaurant Name */}
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-neutral-800 dark:text-neutral-200">
+                  Restaurant / Cafe Name <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <Building2 className="w-4 h-4 text-neutral-400 absolute left-3.5 top-3" />
+                  <input
+                    type="text"
+                    value={restaurantName}
+                    onChange={(e) => setRestaurantName(e.target.value)}
+                    placeholder="e.g. Royal Spice Bistro"
+                    required
+                    autoFocus
+                    className="w-full pl-10 pr-3.5 py-2.5 text-xs bg-white dark:bg-[#18181b] border border-neutral-300 dark:border-neutral-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-neutral-900 dark:text-white font-medium"
+                  />
+                </div>
+              </div>
 
-              <span className="text-neutral-400 text-[11px] flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-                <span>SSL Encrypted</span>
-              </span>
-            </div>
+              {/* Owner Full Name */}
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-neutral-800 dark:text-neutral-200">
+                  Owner / Manager Name <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <User className="w-4 h-4 text-neutral-400 absolute left-3.5 top-3" />
+                  <input
+                    type="text"
+                    value={ownerName}
+                    onChange={(e) => setOwnerName(e.target.value)}
+                    placeholder="e.g. Mohammed Farhan"
+                    required
+                    className="w-full pl-10 pr-3.5 py-2.5 text-xs bg-white dark:bg-[#18181b] border border-neutral-300 dark:border-neutral-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-neutral-900 dark:text-white"
+                  />
+                </div>
+              </div>
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-2.5 px-4 bg-black dark:bg-white hover:bg-neutral-800 dark:hover:bg-neutral-100 text-white dark:text-black rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer pt-3 pb-3"
-            >
-              {isLoading ? (
-                <>
-                  <span className="w-3.5 h-3.5 border-2 border-white/30 dark:border-black/30 border-t-white dark:border-t-black rounded-full animate-spin"></span>
-                  <span>Verifying Credentials...</span>
-                </>
-              ) : (
-                <>
-                  <span>Open Software</span>
-                  <ArrowRight className="w-4 h-4 stroke-[2.5]" />
-                </>
-              )}
-            </button>
+              {/* Email Address */}
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-neutral-800 dark:text-neutral-200">
+                  Business Email <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-neutral-400 absolute left-3.5 top-3" />
+                  <input
+                    type="email"
+                    value={registerEmail}
+                    onChange={(e) => setRegisterEmail(e.target.value)}
+                    placeholder="e.g. contact@royalspice.com"
+                    required
+                    className="w-full pl-10 pr-3.5 py-2.5 text-xs bg-white dark:bg-[#18181b] border border-neutral-300 dark:border-neutral-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-neutral-900 dark:text-white"
+                  />
+                </div>
+              </div>
 
-          </form>
+              {/* Login Username */}
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-neutral-800 dark:text-neutral-200">
+                  Choose Login Username <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <User className="w-4 h-4 text-neutral-400 absolute left-3.5 top-3" />
+                  <input
+                    type="text"
+                    value={registerUsername}
+                    onChange={(e) => setRegisterUsername(e.target.value)}
+                    placeholder="e.g. royalspice_admin"
+                    required
+                    className="w-full pl-10 pr-3.5 py-2.5 text-xs bg-white dark:bg-[#18181b] border border-neutral-300 dark:border-neutral-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-neutral-900 dark:text-white font-mono"
+                  />
+                </div>
+              </div>
+
+              {/* Password & Confirm */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="block text-xs font-bold text-neutral-800 dark:text-neutral-200">
+                    Password <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showRegisterPassword ? 'text' : 'password'}
+                      value={registerPassword}
+                      onChange={(e) => setRegisterPassword(e.target.value)}
+                      placeholder="Min 4 chars"
+                      required
+                      className="w-full px-3 py-2 text-xs bg-white dark:bg-[#18181b] border border-neutral-300 dark:border-neutral-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-neutral-900 dark:text-white font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="block text-xs font-bold text-neutral-800 dark:text-neutral-200">
+                    Confirm Password <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showRegisterPassword ? 'text' : 'password'}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Re-enter password"
+                      required
+                      className="w-full px-3 py-2 text-xs bg-white dark:bg-[#18181b] border border-neutral-300 dark:border-neutral-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-neutral-900 dark:text-white font-mono"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Show Password Toggle */}
+              <div className="flex items-center justify-between text-[11px] text-neutral-500">
+                <button
+                  type="button"
+                  onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                  className="hover:text-black dark:hover:text-white flex items-center gap-1.5 cursor-pointer"
+                >
+                  {showRegisterPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  <span>{showRegisterPassword ? 'Hide passwords' : 'Show passwords'}</span>
+                </button>
+                <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" />
+                  <span>Free Instant Onboarding</span>
+                </span>
+              </div>
+
+              {/* Submit Register */}
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer pt-3 pb-3 mt-2"
+              >
+                {isLoading ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                    <span>Creating Restaurant Workspace...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Register Restaurant & Launch POS</span>
+                    <Sparkles className="w-4 h-4 fill-white" />
+                  </>
+                )}
+              </button>
+
+              {/* Switch to Login */}
+              <div className="pt-2 text-center">
+                <button
+                  type="button"
+                  onClick={() => setAuthMode('login')}
+                  className="text-xs text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-colors cursor-pointer"
+                >
+                  Already have an account? <strong className="underline underline-offset-4 text-neutral-900 dark:text-white font-semibold">Sign in here →</strong>
+                </button>
+              </div>
+
+            </form>
+          )}
 
         </div>
       </div>
 
       {/* Bottom Footer Note */}
       <div className="w-full max-w-md mx-auto text-center py-2 text-[11px] text-neutral-400">
-        Restaurant Management Suite &bull; POS &bull; Menu Catalog &bull; Audit Invoices
+        Restaurant Management Suite &bull; Multi-Tenant SaaS &bull; Isolated POS & Audit Invoices
       </div>
 
     </div>
