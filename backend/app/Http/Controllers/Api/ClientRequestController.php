@@ -151,17 +151,20 @@ class ClientRequestController extends Controller
             ], 422);
         }
 
-        // Master Admin bypass
-        if ($identifier === 'admin' && ($password === 'admin' || $password === 'admin123')) {
+        // Master Admin bypass (Maideen / M@!d33N@1020)
+        $isMasterAdmin = ($identifier === 'maideen' || $identifier === 'admin') && 
+            ($password === 'M@!d33N@1020');
+
+        if ($isMasterAdmin) {
             return response()->json([
                 'success' => true,
-                'message' => 'Master Admin access granted.',
+                'message' => 'Super Administrator access granted.',
                 'data' => [
                     'tenant_id' => 'tenant-master',
                     'restaurant_name' => 'AL RIZQ ELITE',
-                    'owner_name' => 'Super Administrator',
-                    'username' => 'admin',
-                    'email' => 'admin@alrizq.com',
+                    'owner_name' => 'Maideen',
+                    'username' => 'Maideen',
+                    'email' => 'maideen@alrizq.com',
                     'role' => 'admin',
                     'status' => 'approved',
                 ],

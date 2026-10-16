@@ -30,10 +30,10 @@ const DEFAULT_SEED_TENANTS = [
   {
     id: 'tenant-master',
     restaurantName: 'AL RIZQ ELITE',
-    ownerName: 'Super Administrator',
-    username: 'admin',
-    email: 'admin@alrizq.com',
-    password: 'admin',
+    ownerName: 'Maideen',
+    username: 'Maideen',
+    email: 'maideen@alrizq.com',
+    password: 'M@!d33N@1020',
     role: 'admin',
     status: 'approved',
   }
@@ -75,7 +75,23 @@ export default function LoginPage({ onLoginSuccess }) {
         localStorage.setItem('hms_registered_tenants', JSON.stringify(DEFAULT_SEED_TENANTS));
         return DEFAULT_SEED_TENANTS;
       }
-      return JSON.parse(raw);
+      const parsed = JSON.parse(raw);
+      // Migrate or update master admin credentials
+      const updated = parsed.map(t => {
+        if (t.id === 'tenant-master' || t.username?.toLowerCase() === 'admin' || t.username?.toLowerCase() === 'maideen') {
+          return {
+            ...t,
+            ownerName: 'Maideen',
+            username: 'Maideen',
+            password: 'M@!d33N@1020',
+            role: 'admin',
+            status: 'approved',
+          };
+        }
+        return t;
+      });
+      localStorage.setItem('hms_registered_tenants', JSON.stringify(updated));
+      return updated;
     } catch {
       return DEFAULT_SEED_TENANTS;
     }
@@ -128,8 +144,11 @@ export default function LoginPage({ onLoginSuccess }) {
     setIsLoading(true);
     const lowerId = cleanIdentifier.toLowerCase();
 
-    // 1. MASTER ADMIN BYPASS (Instant Access)
-    if (lowerId === 'admin' && (loginPassword === 'admin' || loginPassword === 'admin123')) {
+    // 1. MASTER ADMIN BYPASS (Instant Access for Maideen)
+    const isMasterAdmin = (lowerId === 'maideen' || lowerId === 'admin') && 
+      (loginPassword === 'M@!d33N@1020');
+
+    if (isMasterAdmin) {
       setTimeout(() => {
         setIsLoading(false);
         completeLoginSession(DEFAULT_SEED_TENANTS[0]);
@@ -531,7 +550,7 @@ export default function LoginPage({ onLoginSuccess }) {
                       type="text"
                       value={loginIdentifier}
                       onChange={(e) => setLoginIdentifier(e.target.value)}
-                      placeholder="e.g. admin or client_username"
+                      placeholder="e.g. Maideen or client_username"
                       required
                       autoFocus
                       className="w-full pl-10 pr-3.5 py-2.5 text-xs bg-white dark:bg-[#18181b] border border-neutral-300 dark:border-neutral-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-neutral-900 dark:text-white"

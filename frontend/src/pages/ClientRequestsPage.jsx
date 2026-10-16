@@ -52,7 +52,7 @@ export default function ClientRequestsPage() {
           username: t.username || 'client',
           email: t.email || '',
           phone: t.phone || '',
-          status: t.status || (t.username === 'admin' ? 'approved' : 'pending'),
+          status: t.status || (t.username?.toLowerCase() === 'admin' || t.username?.toLowerCase() === 'maideen' ? 'approved' : 'pending'),
           created_at: t.createdAt || t.created_at || new Date().toISOString(),
           approved_at: t.approvedAt || t.approved_at || null,
         }));
@@ -716,7 +716,7 @@ export default function ClientRequestsPage() {
                   )}
 
                   {/* REVOKE (if approved) */}
-                  {isApproved && client.username !== 'admin' && (
+                  {isApproved && client.username?.toLowerCase() !== 'admin' && client.username?.toLowerCase() !== 'maideen' && (
                     <button
                       type="button"
                       onClick={() => handleRevoke(client)}
@@ -730,7 +730,7 @@ export default function ClientRequestsPage() {
                   )}
 
                   {/* DELETE RECORD */}
-                  {client.username !== 'admin' && (
+                  {client.username?.toLowerCase() !== 'admin' && client.username?.toLowerCase() !== 'maideen' && (
                     <button
                       type="button"
                       onClick={() => handleDelete(client)}
