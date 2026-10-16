@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\ClientRequestController;
 use App\Http\Controllers\Api\ComboController;
 use App\Http\Controllers\Api\DashboardStatsController;
 use App\Http\Controllers\Api\DiningTableController;
@@ -10,6 +11,18 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ProductImageController;
 use App\Http\Middleware\CheckRestaurantRole;
 use Illuminate\Support\Facades\Route;
+
+// Public Authentication & Client Registration Requests
+Route::post('/client-requests', [ClientRequestController::class, 'store']);
+Route::post('/auth/register', [ClientRequestController::class, 'store']);
+Route::post('/auth/login', [ClientRequestController::class, 'login']);
+Route::get('/auth/check-status', [ClientRequestController::class, 'checkStatus']);
+
+// Admin Client Requests & Approvals
+Route::get('/client-requests', [ClientRequestController::class, 'index']);
+Route::patch('/client-requests/{id}/approve', [ClientRequestController::class, 'approve']);
+Route::patch('/client-requests/{id}/reject', [ClientRequestController::class, 'reject']);
+Route::delete('/client-requests/{id}', [ClientRequestController::class, 'destroy']);
 
 Route::middleware([CheckRestaurantRole::class])->group(function () {
 

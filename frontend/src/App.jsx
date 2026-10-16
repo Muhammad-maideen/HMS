@@ -12,6 +12,7 @@ import POSSimulatorPage from './pages/POSSimulatorPage';
 import OrdersAuditPage from './pages/OrdersAuditPage';
 import TablesPage from './pages/TablesPage';
 import LogosSettingsPage from './pages/LogosSettingsPage';
+import ClientRequestsPage from './pages/ClientRequestsPage';
 import LoginPage from './pages/LoginPage';
 import { api } from './services/api';
 import { ToastProvider } from './context/ToastContext';
@@ -169,6 +170,7 @@ function MainLayout({ onLogout }) {
             }
           }}
           activePage={activePage}
+          onNavigate={handleNavigate}
         />
 
         {/* Content Viewport */}
@@ -270,6 +272,11 @@ function MainLayout({ onLogout }) {
           {/* Module 4: Branding & Logos */}
           {activePage === 'logos' && (
             <LogosSettingsPage />
+          )}
+
+          {/* Module 5: Client Permission Requests */}
+          {activePage === 'client-requests' && (
+            <ClientRequestsPage />
           )}
         </main>
 

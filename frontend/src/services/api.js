@@ -129,4 +129,30 @@ export const api = {
   updateTable: (id, data) => request(`/tables/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteTable: (id) => request(`/tables/${id}`, { method: 'DELETE' }),
   toggleTableStatus: (id) => request(`/tables/${id}/toggle-status`, { method: 'PATCH' }),
+
+  // Client Permission Requests & Approvals
+  getClientRequests: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request(`/client-requests${query ? '?' + query : ''}`);
+  },
+  registerClient: (data) => request('/client-requests', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  loginClient: (data) => request('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  checkClientStatus: (identifier) => request(`/auth/check-status?identifier=${encodeURIComponent(identifier)}`),
+  approveClientRequest: (id, adminNotes = '') => request(`/client-requests/${id}/approve`, {
+    method: 'PATCH',
+    body: JSON.stringify({ admin_notes: adminNotes }),
+  }),
+  rejectClientRequest: (id, adminNotes = '') => request(`/client-requests/${id}/reject`, {
+    method: 'PATCH',
+    body: JSON.stringify({ admin_notes: adminNotes }),
+  }),
+  deleteClientRequest: (id) => request(`/client-requests/${id}`, {
+    method: 'DELETE',
+  }),
 };
