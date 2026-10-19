@@ -10,7 +10,6 @@ import {
   KeyRound, 
   Sparkles,
   Server,
-  Store,
   CheckCircle2,
   AlertCircle
 } from 'lucide-react';
@@ -258,24 +257,7 @@ export default function AdminLoginPage({ onLoginSuccess, onGoToRestaurant }) {
 
           </form>
 
-          {/* Quick Switch Link */}
-          <div className="pt-2 text-center border-t border-neutral-800/70">
-            <button
-              type="button"
-              onClick={onGoToRestaurant}
-              className="text-xs text-neutral-400 hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1.5"
-            >
-              <Store className="w-3.5 h-3.5 text-amber-400" />
-              <span>Not Super Admin? Go to Restaurant POS Login (/)</span>
-            </button>
-          </div>
-
         </div>
-      </div>
-
-      {/* Bottom Footer Note */}
-      <div className="w-full max-w-md mx-auto text-center py-2 text-[11px] text-neutral-500 font-mono z-10">
-        AL RIZQ ENTERPRISE POS &bull; ROUTE: /admin &bull; SECURE ADMISSION GATEWAY
       </div>
 
     </div>
