@@ -8,7 +8,6 @@ import {
   ArrowRight,
   KeyRound, 
   Sparkles,
-  Server,
   CheckCircle2,
   AlertCircle
 } from 'lucide-react';
@@ -126,27 +125,16 @@ export default function AdminLoginPage({ onLoginSuccess, onGoToRestaurant }) {
       <div className="w-full max-w-md mx-auto my-auto py-6 z-10 animate-fadeIn">
         <div className="bg-[#101014]/90 backdrop-blur-xl border border-neutral-800 rounded-3xl p-7 sm:p-9 shadow-2xl shadow-black/80 space-y-6 relative overflow-hidden">
           
-          {/* Top Decorative Border Accent */}
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-amber-400 to-emerald-500" />
-
           {/* Icon & Title */}
-          <div className="text-center space-y-2">
+          <div className="text-center space-y-3">
             <div className="w-16 h-16 rounded-2xl bg-neutral-900 border border-neutral-700/80 flex items-center justify-center mx-auto shadow-inner relative group">
               <ShieldCheck className="w-8 h-8 text-emerald-400 transition-transform group-hover:scale-110 duration-200" />
               <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-[#101014]" />
             </div>
 
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-300 text-[10px] font-mono uppercase tracking-wider">
-              <Server className="w-3 h-3 text-emerald-400" />
-              <span>Multi-Tenant Gateway</span>
-            </div>
-
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Super Admin Login
             </h1>
-            <p className="text-xs text-neutral-400 max-w-xs mx-auto leading-relaxed">
-              Admit, accept or reject incoming store registrations & manage client access.
-            </p>
           </div>
 
           {/* Error Message */}
