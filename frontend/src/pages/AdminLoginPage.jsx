@@ -93,36 +93,14 @@ export default function AdminLoginPage({ onLoginSuccess, onGoToRestaurant }) {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#070709] text-white flex flex-col justify-between p-4 sm:p-6 font-sans selection:bg-emerald-500 selection:text-black relative overflow-hidden">
+    <div className="min-h-screen w-full bg-[#070709] text-white flex flex-col justify-center items-center p-4 sm:p-6 font-sans selection:bg-emerald-500 selection:text-black relative overflow-hidden">
       
       {/* Background Ambient Glows */}
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-[450px] h-[450px] bg-amber-500/10 rounded-full blur-[140px] pointer-events-none" />
 
-      {/* Top Header Bar */}
-      <div className="w-full max-w-5xl mx-auto flex items-center justify-between py-2 z-10">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-neutral-900 border border-neutral-700 flex items-center justify-center font-black shadow-lg">
-            <ShieldCheck className="w-5 h-5 text-emerald-400" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-extrabold tracking-tight text-white block">
-                AL RIZQ PLATFORM
-              </span>
-              <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-950/80 text-emerald-300 border border-emerald-500/30">
-                /admin
-              </span>
-            </div>
-            <span className="text-[11px] text-neutral-400 font-medium">
-              Super Admin Admission & Multi-Tenant Control
-            </span>
-          </div>
-        </div>
-      </div>
-
       {/* Center Auth Card */}
-      <div className="w-full max-w-md mx-auto my-auto py-6 z-10 animate-fadeIn">
+      <div className="w-full max-w-md mx-auto z-10 animate-fadeIn">
         <div className="bg-[#101014]/90 backdrop-blur-xl border border-neutral-800 rounded-3xl p-7 sm:p-9 shadow-2xl shadow-black/80 space-y-6 relative overflow-hidden">
           
           {/* Icon & Title */}
