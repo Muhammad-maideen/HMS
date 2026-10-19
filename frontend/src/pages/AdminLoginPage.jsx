@@ -21,8 +21,8 @@ import ThemeToggleBtn from '../components/ThemeToggleBtn';
 export default function AdminLoginPage({ onLoginSuccess, onGoToRestaurant }) {
   const { addToast } = useToast();
 
-  const [username, setUsername] = useState('muhammad');
-  const [password, setPassword] = useState('muhammad@1020');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -89,17 +89,10 @@ export default function AdminLoginPage({ onLoginSuccess, onGoToRestaurant }) {
           onLoginSuccess(adminSession);
         }
       } else {
-        setErrorMessage('Invalid credentials. Required: username "muhammad" and password "muhammad@1020"');
+        setErrorMessage('Invalid credentials. Please enter the correct admin username and password.');
         addToast('Access Denied: Invalid administrator credentials', 'error');
       }
     }, 400);
-  };
-
-  const handleFillCredentials = () => {
-    setUsername('muhammad');
-    setPassword('muhammad@1020');
-    setErrorMessage('');
-    addToast('Admin credentials filled!', 'info');
   };
 
   return (
@@ -176,7 +169,7 @@ export default function AdminLoginPage({ onLoginSuccess, onGoToRestaurant }) {
           )}
 
           {/* Form */}
-          <form onSubmit={handleAdminLogin} className="space-y-4">
+          <form onSubmit={handleAdminLogin} className="space-y-4" autoComplete="off">
             
             {/* Username */}
             <div className="space-y-1.5">
@@ -187,14 +180,21 @@ export default function AdminLoginPage({ onLoginSuccess, onGoToRestaurant }) {
                 <User className="w-4 h-4 text-neutral-500 absolute left-3.5 top-3" />
                 <input
                   type="text"
+                  name="admin_username"
+                  id="admin_username"
                   value={username}
                   onChange={(e) => {
                     setUsername(e.target.value);
                     setErrorMessage('');
                   }}
-                  placeholder="muhammad"
+                  placeholder="Enter admin username"
                   required
                   autoFocus
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="none"
+                  spellCheck="false"
+                  data-lpignore="true"
                   className="w-full pl-10 pr-3.5 py-2.5 text-xs bg-neutral-900/90 border border-neutral-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-white font-mono placeholder:text-neutral-600 transition-all"
                 />
               </div>
@@ -209,13 +209,20 @@ export default function AdminLoginPage({ onLoginSuccess, onGoToRestaurant }) {
                 <Lock className="w-4 h-4 text-neutral-500 absolute left-3.5 top-3" />
                 <input
                   type={showPassword ? 'text' : 'password'}
+                  name="admin_secret_pass"
+                  id="admin_secret_pass"
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value);
                     setErrorMessage('');
                   }}
-                  placeholder="muhammad@1020"
+                  placeholder="Enter admin password"
                   required
+                  autoComplete="new-password"
+                  autoCorrect="off"
+                  autoCapitalize="none"
+                  spellCheck="false"
+                  data-lpignore="true"
                   className="w-full pl-10 pr-10 py-2.5 text-xs bg-neutral-900/90 border border-neutral-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-white font-mono placeholder:text-neutral-600 transition-all"
                 />
                 <button
@@ -227,23 +234,6 @@ export default function AdminLoginPage({ onLoginSuccess, onGoToRestaurant }) {
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-            </div>
-
-            {/* Quick Helper Badge */}
-            <div className="p-3 bg-neutral-900/70 border border-neutral-800/80 rounded-xl flex items-center justify-between text-xs">
-              <div className="space-y-0.5">
-                <span className="text-[10px] text-neutral-500 uppercase font-mono block">Required Credentials:</span>
-                <span className="font-mono text-emerald-400 font-bold text-[11px]">
-                  muhammad <span className="text-neutral-600">/</span> muhammad@1020
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={handleFillCredentials}
-                className="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold transition-all cursor-pointer"
-              >
-                Auto Fill
-              </button>
             </div>
 
             {/* Submit Button */}
