@@ -70,41 +70,6 @@ export default function Sidebar({
     };
   }, []);
 
-  // Track pending client requests count for admin badge
-  const [pendingRequestsCount, setPendingRequestsCount] = useState(() => {
-    try {
-      const raw = localStorage.getItem('hms_client_requests');
-      if (!raw) return 0;
-      const list = JSON.parse(raw);
-      return Array.isArray(list) ? list.filter(r => r.status === 'pending').length : 0;
-    } catch {
-      return 0;
-    }
-  });
-
-  useEffect(() => {
-    const updatePendingCount = () => {
-      try {
-        const raw = localStorage.getItem('hms_client_requests');
-        if (!raw) {
-          setPendingRequestsCount(0);
-          return;
-        }
-        const list = JSON.parse(raw);
-        setPendingRequestsCount(Array.isArray(list) ? list.filter(r => r.status === 'pending').length : 0);
-      } catch {
-        setPendingRequestsCount(0);
-      }
-    };
-
-    window.addEventListener('storage', updatePendingCount);
-    window.addEventListener('hms_client_requests_updated', updatePendingCount);
-    return () => {
-      window.removeEventListener('storage', updatePendingCount);
-      window.removeEventListener('hms_client_requests_updated', updatePendingCount);
-    };
-  }, []);
-
   // Check if current active page is one of the Products sub-modules
   const isProductSectionActive = activePage === 'products' || activePage === 'categories' || activePage === 'combos';
   
@@ -284,40 +249,6 @@ export default function Sidebar({
             }`} />
             {!isCollapsed && <span className="truncate">Orders & Bills</span>}
           </div>
-        </button>
-
-        {/* 4. Client Permission Requests (Multi-Tenant Admission) */}
-        <button
-          type="button"
-          onClick={() => setActivePage('client-requests')}
-          title="Client Permission Requests"
-          className={`group flex items-center transition-all cursor-pointer ${
-            isCollapsed 
-              ? 'w-11 h-11 p-0 mx-auto justify-center rounded-xl relative' 
-              : 'w-full px-2.5 py-2 rounded-xl justify-between text-xs font-medium'
-          } ${
-            activePage === 'client-requests'
-              ? 'bg-neutral-900 text-white shadow-xs font-semibold'
-              : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100/80 dark:text-neutral-400 dark:hover:text-white dark:hover:bg-neutral-800'
-          }`}
-        >
-          <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-2.5 min-w-0'}`}>
-            <UserCheck className={`w-4 h-4 shrink-0 transition-colors ${
-              activePage === 'client-requests' ? 'text-white' : 'text-neutral-500 group-hover:text-neutral-900 dark:text-neutral-400 dark:group-hover:text-white'
-            }`} />
-            {!isCollapsed && <span className="truncate">Client Requests</span>}
-          </div>
-
-          {/* Pending Notification Badge */}
-          {pendingRequestsCount > 0 && (
-            isCollapsed ? (
-              <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-amber-500 ring-2 ring-white dark:ring-neutral-900 animate-pulse" />
-            ) : (
-              <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500 text-neutral-950 animate-pulse shrink-0">
-                {pendingRequestsCount}
-              </span>
-            )
-          )}
         </button>
 
         {/* 3. Menu / Products Accordion */}

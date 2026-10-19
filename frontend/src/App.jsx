@@ -12,13 +12,14 @@ import POSSimulatorPage from './pages/POSSimulatorPage';
 import OrdersAuditPage from './pages/OrdersAuditPage';
 import TablesPage from './pages/TablesPage';
 import LogosSettingsPage from './pages/LogosSettingsPage';
-import ClientRequestsPage from './pages/ClientRequestsPage';
+import SuperAdminPortal from './pages/SuperAdminPortal';
+import AdminLoginPage from './pages/AdminLoginPage';
 import LoginPage from './pages/LoginPage';
 import { api } from './services/api';
 import { ToastProvider } from './context/ToastContext';
 import { ThemeProvider } from './context/ThemeContext';
 
-function MainLayout({ onLogout }) {
+function MainLayout({ onLogout, isSuperAdmin = false, onSwitchToAdminPortal }) {
   // Modules:
   // 1. 'dashboard' (Executive Overview Dashboard)
   // 2. 'pos' (POS Terminal & Checkout)
@@ -171,6 +172,8 @@ function MainLayout({ onLogout }) {
           }}
           activePage={activePage}
           onNavigate={handleNavigate}
+          isSuperAdmin={isSuperAdmin}
+          onSwitchToAdminPortal={onSwitchToAdminPortal}
         />
 
         {/* Content Viewport */}
@@ -273,11 +276,6 @@ function MainLayout({ onLogout }) {
           {activePage === 'logos' && (
             <LogosSettingsPage />
           )}
-
-          {/* Module 5: Client Permission Requests */}
-          {activePage === 'client-requests' && (
-            <ClientRequestsPage />
-          )}
         </main>
 
       </div>
@@ -287,27 +285,97 @@ function MainLayout({ onLogout }) {
 }
 
 export default function App() {
+  // Path routing: '/' or '/admin'
+  const [currentPath, setCurrentPath] = useState(() => {
+    return window.location.pathname || '/';
+  });
+
+  // Admin authentication state for /admin
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(() => {
+    return localStorage.getItem('hms_admin_authenticated') === 'true';
+  });
+
+  // Restaurant authentication state for /
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return localStorage.getItem('hms_is_authenticated') === 'true';
   });
 
-  const handleLoginSuccess = () => {
+  // Handle browser back/forward buttons
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentPath(window.location.pathname || '/');
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const navigateTo = (path) => {
+    window.history.pushState({}, '', path);
+    setCurrentPath(path);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleAdminLoginSuccess = () => {
+    setIsAdminAuthenticated(true);
+  };
+
+  const handleAdminLogout = () => {
+    localStorage.removeItem('hms_admin_authenticated');
+    localStorage.removeItem('hms_admin_user');
+    setIsAdminAuthenticated(false);
+  };
+
+  const handleRestaurantLoginSuccess = () => {
     setIsAuthenticated(true);
   };
 
-  const handleLogout = () => {
+  const handleRestaurantLogout = () => {
     localStorage.removeItem('hms_is_authenticated');
     localStorage.removeItem('hms_auth_user');
     setIsAuthenticated(false);
   };
 
+  const isAdminRoute = currentPath === '/admin' || currentPath.startsWith('/admin');
+
+  // Check if current user is Super Admin (Muhammad)
+  const isSuperAdminUser = (() => {
+    try {
+      const auth = JSON.parse(localStorage.getItem('hms_auth_user') || '{}');
+      const u = auth.username?.toLowerCase() || '';
+      return u === 'muhammad' || u === 'admin' || u === 'maideen' || auth.role === 'super_admin';
+    } catch {
+      return false;
+    }
+  })();
+
   return (
     <ThemeProvider>
       <ToastProvider>
-        {isAuthenticated ? (
-          <MainLayout onLogout={handleLogout} />
+        {isAdminRoute ? (
+          isAdminAuthenticated ? (
+            <SuperAdminPortal 
+              onSwitchToRestaurant={() => navigateTo('/')} 
+              onLogout={handleAdminLogout} 
+            />
+          ) : (
+            <AdminLoginPage 
+              onLoginSuccess={handleAdminLoginSuccess} 
+              onGoToRestaurant={() => navigateTo('/')} 
+            />
+          )
         ) : (
-          <LoginPage onLoginSuccess={handleLoginSuccess} />
+          isAuthenticated ? (
+            <MainLayout 
+              onLogout={handleRestaurantLogout} 
+              isSuperAdmin={isSuperAdminUser}
+              onSwitchToAdminPortal={() => navigateTo('/admin')}
+            />
+          ) : (
+            <LoginPage 
+              onLoginSuccess={handleRestaurantLoginSuccess} 
+              onGoToAdminPortal={() => navigateTo('/admin')}
+            />
+          )
         )}
       </ToastProvider>
     </ThemeProvider>

@@ -30,16 +30,16 @@ const DEFAULT_SEED_TENANTS = [
   {
     id: 'tenant-master',
     restaurantName: 'AL RIZQ ELITE',
-    ownerName: 'Maideen',
-    username: 'Maideen',
-    email: 'maideen@alrizq.com',
-    password: 'M@!d33N@1020',
-    role: 'admin',
+    ownerName: 'Muhammad',
+    username: 'muhammad',
+    email: 'muhammad@alrizq.com',
+    password: 'muhammad@1020',
+    role: 'super_admin',
     status: 'approved',
   }
 ];
 
-export default function LoginPage({ onLoginSuccess }) {
+export default function LoginPage({ onLoginSuccess, onGoToAdminPortal }) {
   const { addToast } = useToast();
 
   // Mode: 'login' | 'register' | 'pending_notice'
@@ -78,13 +78,13 @@ export default function LoginPage({ onLoginSuccess }) {
       const parsed = JSON.parse(raw);
       // Migrate or update master admin credentials
       const updated = parsed.map(t => {
-        if (t.id === 'tenant-master' || t.username?.toLowerCase() === 'admin' || t.username?.toLowerCase() === 'maideen') {
+        if (t.id === 'tenant-master' || t.username?.toLowerCase() === 'admin' || t.username?.toLowerCase() === 'muhammad' || t.username?.toLowerCase() === 'maideen') {
           return {
             ...t,
-            ownerName: 'Maideen',
-            username: 'Maideen',
-            password: 'M@!d33N@1020',
-            role: 'admin',
+            ownerName: 'Muhammad',
+            username: 'muhammad',
+            password: 'muhammad@1020',
+            role: 'super_admin',
             status: 'approved',
           };
         }
@@ -144,9 +144,9 @@ export default function LoginPage({ onLoginSuccess }) {
     setIsLoading(true);
     const lowerId = cleanIdentifier.toLowerCase();
 
-    // 1. MASTER ADMIN BYPASS (Instant Access for Maideen)
-    const isMasterAdmin = (lowerId === 'maideen' || lowerId === 'admin') && 
-      (loginPassword === 'M@!d33N@1020');
+    // 1. MASTER ADMIN BYPASS (Instant Access for Muhammad)
+    const isMasterAdmin = (lowerId === 'muhammad' || lowerId === 'admin' || lowerId === 'maideen') && 
+      (loginPassword === 'muhammad@1020' || loginPassword === 'M@!d33N@1020');
 
     if (isMasterAdmin) {
       setTimeout(() => {
@@ -214,12 +214,12 @@ export default function LoginPage({ onLoginSuccess }) {
       if (status === 'pending') {
         setPendingAccount(matched);
         setAuthMode('pending_notice');
-        addToast(`Permission Pending: "${matched.restaurantName}" must be admitted by the Super Admin first.`, 'warning');
+        addToast(`Store Pending Approval: "${matched.restaurantName}" must be accepted by Muhammad in the Admin Panel before it can open.`, 'warning');
         return;
       }
 
       if (status === 'rejected') {
-        addToast(`Access Denied: Your registration request for "${matched.restaurantName}" was declined.`, 'error');
+        addToast(`Access Declined: Your store registration for "${matched.restaurantName}" was rejected by the admin. The store will not open.`, 'error');
         return;
       }
 
@@ -384,12 +384,25 @@ export default function LoginPage({ onLoginSuccess }) {
             </span>
             <span className="text-[10px] text-neutral-500 font-mono flex items-center gap-1.5 mt-0.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              Multi-Tenant SaaS &bull; Permission Gated
+              Multi-Tenant SaaS &bull; Store Approval Required
             </span>
           </div>
         </div>
 
-        <ThemeToggleBtn />
+        <div className="flex items-center gap-2">
+          {onGoToAdminPortal && (
+            <button
+              type="button"
+              onClick={onGoToAdminPortal}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 text-xs font-bold hover:scale-102 transition-all cursor-pointer shadow-xs border border-neutral-700 dark:border-neutral-200"
+              title="Go to Admin Panel (/admin)"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 dark:text-emerald-600" />
+              <span>Admin Panel (/admin)</span>
+            </button>
+          )}
+          <ThemeToggleBtn />
+        </div>
       </div>
 
       {/* Main Container */}
@@ -408,14 +421,15 @@ export default function LoginPage({ onLoginSuccess }) {
 
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-[11px] font-black uppercase tracking-wider">
                 <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
-                Permission Request Triggered
+                Permission Request Submitted
               </div>
 
               <h2 className="text-xl sm:text-2xl font-black text-neutral-900 dark:text-white tracking-tight">
-                Awaiting Admin Admission
+                Store Pending Admin Admission
               </h2>
               <p className="text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed max-w-sm mx-auto">
-                Your registration for <strong className="text-neutral-900 dark:text-white font-bold">{pendingAccount.restaurantName || pendingAccount.restaurant_name}</strong> has been sent to the Super Admin.
+                Your store <strong className="text-neutral-900 dark:text-white font-bold">{pendingAccount.restaurantName || pendingAccount.restaurant_name}</strong> is awaiting admission by Super Admin Muhammad in the Admin Panel.
+                <br /><span className="text-amber-600 dark:text-amber-400 font-bold mt-1 inline-block">Once accepted, your store will open and work. If rejected, it will not open.</span>
               </p>
             </div>
 
@@ -814,8 +828,20 @@ export default function LoginPage({ onLoginSuccess }) {
       </div>
 
       {/* Bottom Footer Note */}
-      <div className="w-full max-w-md mx-auto text-center py-2 text-[11px] text-neutral-400">
-        Restaurant Management Suite &bull; Permission Gated SaaS &bull; Admin Admission Required
+      <div className="w-full max-w-md mx-auto text-center py-2 text-[11px] text-neutral-400 flex items-center justify-center gap-2 flex-wrap">
+        <span>Restaurant Management Suite &bull; Store Approval Required</span>
+        {onGoToAdminPortal && (
+          <>
+            <span>&bull;</span>
+            <button
+              type="button"
+              onClick={onGoToAdminPortal}
+              className="text-neutral-600 dark:text-neutral-300 hover:text-black dark:hover:text-white underline font-semibold cursor-pointer"
+            >
+              Admin Panel (/admin) &rarr;
+            </button>
+          </>
+        )}
       </div>
 
     </div>

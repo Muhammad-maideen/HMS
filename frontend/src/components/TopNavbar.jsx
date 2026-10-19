@@ -31,48 +31,14 @@ export default function TopNavbar({
   onLogout,
   onGlobalSearch,
   activePage = 'pos',
-  onNavigate
+  isSuperAdmin = false,
+  onSwitchToAdminPortal
 }) {
   const { addToast } = useToast();
   const searchInputRef = useRef(null);
 
   // Search query
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Track pending client permission requests
-  const [pendingRequests, setPendingRequests] = useState(() => {
-    try {
-      const raw = localStorage.getItem('hms_client_requests');
-      if (!raw) return [];
-      const list = JSON.parse(raw);
-      return Array.isArray(list) ? list.filter(r => r.status === 'pending') : [];
-    } catch {
-      return [];
-    }
-  });
-
-  useEffect(() => {
-    const updatePending = () => {
-      try {
-        const raw = localStorage.getItem('hms_client_requests');
-        if (!raw) {
-          setPendingRequests([]);
-          return;
-        }
-        const list = JSON.parse(raw);
-        setPendingRequests(Array.isArray(list) ? list.filter(r => r.status === 'pending') : []);
-      } catch {
-        setPendingRequests([]);
-      }
-    };
-
-    window.addEventListener('storage', updatePending);
-    window.addEventListener('hms_client_requests_updated', updatePending);
-    return () => {
-      window.removeEventListener('storage', updatePending);
-      window.removeEventListener('hms_client_requests_updated', updatePending);
-    };
-  }, []);
 
   // Live formatted date and time: e.g. "May 20, 2025 10:30 AM"
   const [currentDateTime, setCurrentDateTime] = useState('');
@@ -242,19 +208,19 @@ export default function TopNavbar({
           </div>
         </div>
 
-        {/* Right Tools: Pending Client Requests, Notification Bell, Live Date/Time, User Profile */}
+        {/* Right Tools: Super Admin Portal Switcher (for Maideen), Notification Bell, Live Date/Time, User Profile */}
         <div className="flex items-center gap-2.5 shrink-0">
           
-          {/* Quick Client Requests Button (when pending) */}
-          {pendingRequests.length > 0 && (
+          {/* Switch to Super Admin Portal (Only for Super Admin Maideen) */}
+          {isSuperAdmin && onSwitchToAdminPortal && (
             <button
               type="button"
-              onClick={() => onNavigate && onNavigate('client-requests')}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/50 text-amber-800 dark:text-amber-300 text-xs font-bold transition-all cursor-pointer shadow-xs animate-pulse"
-              title="Client Registration Requests - Click to Admit"
+              onClick={onSwitchToAdminPortal}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 text-xs font-bold hover:scale-102 transition-all cursor-pointer shadow-xs border border-neutral-700 dark:border-neutral-200"
+              title="Open Master Super Admin Console (Client Requests & Multi-Tenant Management)"
             >
-              <UserCheck className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-              <span>{pendingRequests.length} Client Request{pendingRequests.length > 1 ? 's' : ''}</span>
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 dark:text-emerald-600" />
+              <span>Super Admin Portal</span>
             </button>
           )}
 
@@ -267,52 +233,20 @@ export default function TopNavbar({
               title="Notifications"
             >
               <Bell className="w-4 h-4" />
-              {(unreadCount > 0 || pendingRequests.length > 0) && (
-                <span className={`absolute top-1.5 right-1.5 w-4 h-4 text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-white dark:border-neutral-900 ${
-                  pendingRequests.length > 0 ? 'bg-amber-500 text-neutral-950 font-black' : 'bg-neutral-900 dark:bg-white dark:text-black'
-                }`}>
-                  {unreadCount + pendingRequests.length}
+              {unreadCount > 0 && (
+                <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-neutral-900 dark:bg-white text-white dark:text-black text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-white dark:border-neutral-900">
+                  {unreadCount}
                 </span>
               )}
             </button>
 
             {/* Notifications Dropdown Modal */}
             {isNotifOpen && (
-              <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-[#121214] rounded-2xl shadow-xl border border-neutral-200/90 dark:border-neutral-800 py-2 z-50 animate-fadeIn text-neutral-900 dark:text-neutral-100">
+              <div className="absolute right-0 top-full mt-2 w-72 bg-white dark:bg-[#121214] rounded-2xl shadow-xl border border-neutral-200/90 dark:border-neutral-800 py-2 z-50 animate-fadeIn text-neutral-900 dark:text-neutral-100">
                 <div className="px-3.5 py-2 border-b border-neutral-100 dark:border-neutral-800 flex items-center justify-between">
                   <span className="text-xs font-bold text-neutral-900 dark:text-white">Notifications</span>
-                  <span className="text-[10px] font-medium text-neutral-500 dark:text-neutral-400">
-                    {unreadCount + pendingRequests.length} updates
-                  </span>
+                  <span className="text-[10px] font-medium text-neutral-500 dark:text-neutral-400">{unreadCount} unread</span>
                 </div>
-
-                {/* Prominent Pending Client Permission Alert */}
-                {pendingRequests.length > 0 && (
-                  <div className="bg-amber-50 dark:bg-amber-950/40 p-3 border-b border-amber-200/60 dark:border-amber-900/40 space-y-1.5">
-                    <div className="flex items-center justify-between text-xs font-bold text-amber-900 dark:text-amber-200">
-                      <span className="flex items-center gap-1.5">
-                        <UserCheck className="w-4 h-4 text-amber-600" />
-                        <span>Client Permission Request</span>
-                      </span>
-                      <span className="px-1.5 py-0.2 rounded-full bg-amber-500 text-neutral-950 text-[10px] font-black">
-                        {pendingRequests.length} Pending
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-amber-800 dark:text-amber-300 leading-snug">
-                      <strong>{pendingRequests[0].restaurant_name || pendingRequests[0].restaurantName}</strong> requested software access.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsNotifOpen(false);
-                        if (onNavigate) onNavigate('client-requests');
-                      }}
-                      className="mt-1 w-full py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1 cursor-pointer shadow-xs"
-                    >
-                      <span>Admit Client in Admin Panel →</span>
-                    </button>
-                  </div>
-                )}
 
                 <div className="divide-y divide-neutral-100 dark:divide-neutral-800 max-h-60 overflow-y-auto">
                   {notifications.map(n => (

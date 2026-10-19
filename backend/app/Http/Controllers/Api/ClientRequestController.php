@@ -151,9 +151,12 @@ class ClientRequestController extends Controller
             ], 422);
         }
 
-        // Master Admin bypass (Maideen / M@!d33N@1020)
-        $isMasterAdmin = ($identifier === 'maideen' || $identifier === 'admin') && 
-            ($password === 'M@!d33N@1020');
+        // Master Admin bypass (muhammad / muhammad@1020 or maideen)
+        $isMasterAdmin = (
+            ($identifier === 'muhammad' && $password === 'muhammad@1020') ||
+            ($identifier === 'maideen' && ($password === 'muhammad@1020' || $password === 'M@!d33N@1020')) ||
+            ($identifier === 'admin' && ($password === 'muhammad@1020' || $password === 'M@!d33N@1020'))
+        );
 
         if ($isMasterAdmin) {
             return response()->json([
@@ -162,10 +165,10 @@ class ClientRequestController extends Controller
                 'data' => [
                     'tenant_id' => 'tenant-master',
                     'restaurant_name' => 'AL RIZQ ELITE',
-                    'owner_name' => 'Maideen',
-                    'username' => 'Maideen',
-                    'email' => 'maideen@alrizq.com',
-                    'role' => 'admin',
+                    'owner_name' => 'Muhammad',
+                    'username' => 'muhammad',
+                    'email' => 'muhammad@alrizq.com',
+                    'role' => 'super_admin',
                     'status' => 'approved',
                 ],
             ]);
