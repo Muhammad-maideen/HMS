@@ -19,7 +19,7 @@ import { api } from './services/api';
 import { ToastProvider } from './context/ToastContext';
 import { ThemeProvider } from './context/ThemeContext';
 
-function MainLayout({ onLogout, isSuperAdmin = false, onSwitchToAdminPortal }) {
+function MainLayout({ onLogout }) {
   // Modules:
   // 1. 'dashboard' (Executive Overview Dashboard)
   // 2. 'pos' (POS Terminal & Checkout)
@@ -172,8 +172,6 @@ function MainLayout({ onLogout, isSuperAdmin = false, onSwitchToAdminPortal }) {
           }}
           activePage={activePage}
           onNavigate={handleNavigate}
-          isSuperAdmin={isSuperAdmin}
-          onSwitchToAdminPortal={onSwitchToAdminPortal}
         />
 
         {/* Content Viewport */}
@@ -367,8 +365,6 @@ export default function App() {
           isAuthenticated ? (
             <MainLayout 
               onLogout={handleRestaurantLogout} 
-              isSuperAdmin={isSuperAdminUser}
-              onSwitchToAdminPortal={() => navigateTo('/admin')}
             />
           ) : (
             <LoginPage 

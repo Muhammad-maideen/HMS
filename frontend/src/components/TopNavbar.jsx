@@ -30,9 +30,7 @@ export default function TopNavbar({
   isSidebarCollapsed, 
   onLogout,
   onGlobalSearch,
-  activePage = 'pos',
-  isSuperAdmin = false,
-  onSwitchToAdminPortal
+  activePage = 'pos'
 }) {
   const { addToast } = useToast();
   const searchInputRef = useRef(null);
@@ -208,22 +206,9 @@ export default function TopNavbar({
           </div>
         </div>
 
-        {/* Right Tools: Super Admin Portal Switcher (for Maideen), Notification Bell, Live Date/Time, User Profile */}
+        {/* Right Tools: Notification Bell, Live Date/Time, User Profile */}
         <div className="flex items-center gap-2.5 shrink-0">
           
-          {/* Switch to Super Admin Portal (Only for Super Admin Maideen) */}
-          {isSuperAdmin && onSwitchToAdminPortal && (
-            <button
-              type="button"
-              onClick={onSwitchToAdminPortal}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 text-xs font-bold hover:scale-102 transition-all cursor-pointer shadow-xs border border-neutral-700 dark:border-neutral-200"
-              title="Open Master Super Admin Console (Client Requests & Multi-Tenant Management)"
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 dark:text-emerald-600" />
-              <span>Super Admin Portal</span>
-            </button>
-          )}
-
           {/* Notification Bell */}
           <div className="relative" ref={notifRef}>
             <button

@@ -390,17 +390,6 @@ export default function LoginPage({ onLoginSuccess, onGoToAdminPortal }) {
         </div>
 
         <div className="flex items-center gap-2">
-          {onGoToAdminPortal && (
-            <button
-              type="button"
-              onClick={onGoToAdminPortal}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 text-xs font-bold hover:scale-102 transition-all cursor-pointer shadow-xs border border-neutral-700 dark:border-neutral-200"
-              title="Go to Admin Panel (/admin)"
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 dark:text-emerald-600" />
-              <span>Admin Panel (/admin)</span>
-            </button>
-          )}
           <ThemeToggleBtn />
         </div>
       </div>
