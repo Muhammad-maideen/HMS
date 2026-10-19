@@ -5,6 +5,23 @@ import { useTheme } from '../context/ThemeContext';
 export default function ThemeToggleBtn({ size = 'md', className = '' }) {
   const { theme, toggleTheme, isDark } = useTheme();
 
+  if (size === 'icon') {
+    return (
+      <button
+        type="button"
+        onClick={toggleTheme}
+        className={`w-9 h-9 rounded-xl bg-white dark:bg-neutral-800/90 border border-neutral-200/90 dark:border-neutral-700/80 text-neutral-600 dark:text-neutral-300 hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700/80 transition-all flex items-center justify-center shrink-0 cursor-pointer shadow-xs ${className}`}
+        title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
+      >
+        {isDark ? (
+          <Sun className="w-4 h-4 text-amber-400" />
+        ) : (
+          <Moon className="w-4 h-4 text-neutral-700" />
+        )}
+      </button>
+    );
+  }
+
   if (size === 'sm') {
     return (
       <button

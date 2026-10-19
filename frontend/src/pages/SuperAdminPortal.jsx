@@ -342,44 +342,44 @@ export default function SuperAdminPortal({ onSwitchToRestaurant, onLogout }) {
     <div className="min-h-screen bg-[#f8fafc] dark:bg-[#070709] text-neutral-900 dark:text-neutral-100 font-sans antialiased flex flex-col selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black">
       
       {/* TOP MASTER ADMIN NAVIGATION BAR */}
-      <header className="sticky top-0 z-40 bg-white/90 dark:bg-[#0d0d10]/90 backdrop-blur-md border-b border-neutral-200/90 dark:border-neutral-800/90 px-4 sm:px-6 lg:px-8 py-3.5">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-[#0d0d10]/95 backdrop-blur-md border-b border-neutral-200/90 dark:border-neutral-800/90 px-4 sm:px-6 lg:px-8 py-3">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 sm:gap-4">
           
           {/* Left Brand Emblem */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 flex items-center justify-center font-black shadow-md">
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 flex items-center justify-center font-black shadow-xs shrink-0">
               <ShieldCheck className="w-5 h-5 text-emerald-400 dark:text-emerald-600" />
             </div>
-            <div>
+            <div className="leading-tight shrink-0">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-extrabold tracking-tight text-neutral-900 dark:text-white">
+                <span className="text-sm font-extrabold tracking-tight text-neutral-900 dark:text-white whitespace-nowrap">
                   AL RIZQ PLATFORM
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-300/50">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-300/50 whitespace-nowrap">
                   Super Admin
                 </span>
               </div>
-              <span className="text-[11px] text-neutral-500 font-medium block">
+              <span className="text-[11px] text-neutral-500 font-medium block whitespace-nowrap hidden sm:block">
                 Multi-Tenant Cloud Control Console
               </span>
             </div>
           </div>
 
-          {/* Center Navigation Tabs */}
-          <div className="hidden md:flex items-center gap-1.5 p-1 bg-neutral-100 dark:bg-neutral-900/90 rounded-xl border border-neutral-200 dark:border-neutral-800 text-xs font-semibold">
+          {/* Center Navigation Tabs (Desktop) */}
+          <div className="hidden lg:flex items-center gap-1 p-1 bg-neutral-100 dark:bg-neutral-900/90 rounded-xl border border-neutral-200 dark:border-neutral-800 shrink-0">
             <button
               type="button"
               onClick={() => setActiveTab('requests')}
-              className={`px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-2 cursor-pointer ${
+              className={`h-8 px-3 rounded-lg text-xs font-semibold whitespace-nowrap flex items-center gap-1.5 transition-all cursor-pointer ${
                 activeTab === 'requests'
                   ? 'bg-white dark:bg-[#18181b] text-neutral-900 dark:text-white shadow-xs font-bold'
                   : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
               }`}
             >
-              <UserCheck className="w-3.5 h-3.5" />
-              <span>Admission Desk</span>
+              <UserCheck className="w-3.5 h-3.5 shrink-0" />
+              <span className="whitespace-nowrap">Admission Desk</span>
               {counts.pending > 0 && (
-                <span className="px-1.5 py-0.2 rounded-full bg-amber-500 text-neutral-950 text-[10px] font-black animate-pulse">
+                <span className="px-1.5 py-0.5 rounded-full bg-amber-500 text-neutral-950 text-[10px] font-black leading-none animate-pulse">
                   {counts.pending}
                 </span>
               )}
@@ -388,56 +388,57 @@ export default function SuperAdminPortal({ onSwitchToRestaurant, onLogout }) {
             <button
               type="button"
               onClick={() => setActiveTab('tenants')}
-              className={`px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-2 cursor-pointer ${
+              className={`h-8 px-3 rounded-lg text-xs font-semibold whitespace-nowrap flex items-center gap-1.5 transition-all cursor-pointer ${
                 activeTab === 'tenants'
                   ? 'bg-white dark:bg-[#18181b] text-neutral-900 dark:text-white shadow-xs font-bold'
                   : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
               }`}
             >
-              <Store className="w-3.5 h-3.5" />
-              <span>Active Restaurants</span>
+              <Store className="w-3.5 h-3.5 shrink-0" />
+              <span className="whitespace-nowrap">Active Restaurants</span>
               <span className="text-[10px] font-mono text-neutral-400">({approvedTenants.length})</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTab('system')}
-              className={`px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-2 cursor-pointer ${
+              className={`h-8 px-3 rounded-lg text-xs font-semibold whitespace-nowrap flex items-center gap-1.5 transition-all cursor-pointer ${
                 activeTab === 'system'
                   ? 'bg-white dark:bg-[#18181b] text-neutral-900 dark:text-white shadow-xs font-bold'
                   : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
               }`}
             >
-              <Server className="w-3.5 h-3.5" />
-              <span>System & Cloud</span>
+              <Server className="w-3.5 h-3.5 shrink-0" />
+              <span className="whitespace-nowrap">System & Cloud</span>
             </button>
           </div>
 
           {/* Right Action Tools */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2 shrink-0">
             
             {/* Quick Button to Launch Restaurant POS */}
             <button
               type="button"
               onClick={onSwitchToRestaurant}
-              className="px-3.5 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 dark:bg-white dark:hover:bg-neutral-100 text-white dark:text-neutral-900 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm hover:scale-102"
+              className="h-9 px-3.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 dark:bg-white dark:hover:bg-neutral-100 text-white dark:text-neutral-900 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs whitespace-nowrap shrink-0 hover:scale-[1.02] active:scale-[0.98]"
               title="Switch to Restaurant Operations & POS Suite"
             >
-              <Store className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Launch Restaurant POS</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
+              <Store className="w-3.5 h-3.5 shrink-0" />
+              <span className="whitespace-nowrap">Restaurant POS</span>
+              <ArrowUpRight className="w-3.5 h-3.5 shrink-0 opacity-70" />
             </button>
 
-            <ThemeToggleBtn />
+            {/* Theme Toggle - Sleek Icon Button */}
+            <ThemeToggleBtn size="icon" className="w-9 h-9" />
 
-            {/* Profile Avatar */}
-            <div className="flex items-center gap-2 pl-2 border-l border-neutral-200 dark:border-neutral-800">
-              <div className="w-8 h-8 rounded-xl bg-amber-500 text-neutral-950 font-black text-xs flex items-center justify-center shadow-xs">
+            {/* Profile Avatar & Identity */}
+            <div className="flex items-center gap-2 pl-2 border-l border-neutral-200 dark:border-neutral-800 shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-amber-500 text-neutral-950 font-black text-xs flex items-center justify-center shadow-xs shrink-0 select-none">
                 M
               </div>
-              <div className="hidden lg:block text-left leading-none">
-                <span className="text-xs font-bold block text-neutral-900 dark:text-white">Muhammad</span>
-                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">Super Admin</span>
+              <div className="hidden xl:block text-left leading-tight shrink-0 whitespace-nowrap">
+                <span className="text-xs font-bold block text-neutral-900 dark:text-white whitespace-nowrap">Muhammad</span>
+                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider block whitespace-nowrap">Super Admin</span>
               </div>
             </div>
 
@@ -445,38 +446,57 @@ export default function SuperAdminPortal({ onSwitchToRestaurant, onLogout }) {
             <button
               type="button"
               onClick={onLogout}
-              className="p-2 rounded-xl text-neutral-400 hover:text-rose-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
+              className="w-9 h-9 rounded-xl text-neutral-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-transparent hover:border-rose-200 dark:hover:border-rose-900/50 transition-colors cursor-pointer flex items-center justify-center shrink-0"
               title="Sign Out"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-4 h-4 shrink-0" />
             </button>
 
           </div>
         </div>
 
-        {/* Mobile Sub-Navigation Bar */}
-        <div className="flex md:hidden items-center justify-between gap-1 mt-3 pt-2 border-t border-neutral-100 dark:border-neutral-800 text-xs font-semibold overflow-x-auto">
+        {/* Mobile & Tablet Sub-Navigation Bar */}
+        <div className="flex lg:hidden items-center justify-between gap-1.5 mt-2.5 pt-2 border-t border-neutral-100 dark:border-neutral-800 text-xs font-semibold overflow-x-auto">
           <button
             type="button"
             onClick={() => setActiveTab('requests')}
-            className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 whitespace-nowrap ${activeTab === 'requests' ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900' : 'text-neutral-500'}`}
+            className={`h-8 px-3 rounded-lg flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-all cursor-pointer ${
+              activeTab === 'requests'
+                ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-xs font-bold'
+                : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
+            }`}
           >
-            <span>Admission Desk</span>
-            {counts.pending > 0 && <span className="px-1.5 py-0.2 rounded-full bg-amber-500 text-neutral-950 text-[9px]">{counts.pending}</span>}
+            <UserCheck className="w-3.5 h-3.5 shrink-0" />
+            <span className="whitespace-nowrap">Admission Desk</span>
+            {counts.pending > 0 && (
+              <span className="px-1.5 py-0.5 rounded-full bg-amber-500 text-neutral-950 text-[10px] font-black leading-none animate-pulse">
+                {counts.pending}
+              </span>
+            )}
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('tenants')}
-            className={`px-3 py-1.5 rounded-lg whitespace-nowrap ${activeTab === 'tenants' ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900' : 'text-neutral-500'}`}
+            className={`h-8 px-3 rounded-lg flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-all cursor-pointer ${
+              activeTab === 'tenants'
+                ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-xs font-bold'
+                : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
+            }`}
           >
-            Active Restaurants ({approvedTenants.length})
+            <Store className="w-3.5 h-3.5 shrink-0" />
+            <span className="whitespace-nowrap">Active Restaurants ({approvedTenants.length})</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('system')}
-            className={`px-3 py-1.5 rounded-lg whitespace-nowrap ${activeTab === 'system' ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900' : 'text-neutral-500'}`}
+            className={`h-8 px-3 rounded-lg flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-all cursor-pointer ${
+              activeTab === 'system'
+                ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-xs font-bold'
+                : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
+            }`}
           >
-            System & Cloud
+            <Server className="w-3.5 h-3.5 shrink-0" />
+            <span className="whitespace-nowrap">System & Cloud</span>
           </button>
         </div>
 
