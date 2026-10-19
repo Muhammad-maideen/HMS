@@ -5,8 +5,7 @@ import {
   User, 
   Eye, 
   EyeOff, 
-  ArrowRight, 
-  ArrowLeft,
+  ArrowRight,
   KeyRound, 
   Sparkles,
   Server,
@@ -121,15 +120,6 @@ export default function AdminLoginPage({ onLoginSuccess, onGoToRestaurant }) {
             </span>
           </div>
         </div>
-
-        <button
-          type="button"
-          onClick={onGoToRestaurant}
-          className="px-3.5 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-xs font-semibold text-neutral-300 hover:text-white flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Restaurant POS (/)</span>
-        </button>
       </div>
 
       {/* Center Auth Card */}
