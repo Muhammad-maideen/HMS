@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { AlertTriangle, CheckCircle2, RefreshCw, PackagePlus, ArrowUpRight, Search } from 'lucide-react';
-import { api, getRole } from '../services/api';
+import { api, getRole, canUserModify } from '../services/api';
 import { useToast } from '../context/ToastContext';
 
 export default function OutOfStockPage({ onEditProduct, refreshTrigger }) {
   const { addToast } = useToast();
   const currentRole = getRole();
-  const canModify = currentRole === 'admin' || currentRole === 'manager';
+  const canModify = canUserModify(currentRole);
 
   const [outOfStockItems, setOutOfStockItems] = useState([]);
   const [loading, setLoading] = useState(true);

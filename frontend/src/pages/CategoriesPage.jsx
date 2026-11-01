@@ -12,18 +12,19 @@ import {
   Layers,
   Download
 } from 'lucide-react';
-import { api, getRole } from '../services/api';
+import { api, getRole, canUserModify } from '../services/api';
 import { useToast } from '../context/ToastContext';
 import ConfirmationModal from '../components/ConfirmationModal';
 
 export default function CategoriesPage({ 
   onEditCategory, 
   onOpenNewCategory, 
-  onCategoryUpdated 
+  onCategoryUpdated,
+  refreshTrigger 
 }) {
   const { addToast } = useToast();
   const currentRole = getRole();
-  const canModify = currentRole === 'admin' || currentRole === 'manager';
+  const canModify = canUserModify(currentRole);
 
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -45,7 +46,7 @@ export default function CategoriesPage({
 
   useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [refreshTrigger]);
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {

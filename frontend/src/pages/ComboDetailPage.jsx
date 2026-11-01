@@ -22,7 +22,7 @@ import {
   DollarSign,
   Utensils
 } from 'lucide-react';
-import { api, getRole } from '../services/api';
+import { api, getRole, canUserModify } from '../services/api';
 import { useToast } from '../context/ToastContext';
 
 export default function ComboDetailPage({ 
@@ -33,7 +33,7 @@ export default function ComboDetailPage({
 }) {
   const { addToast } = useToast();
   const currentRole = getRole();
-  const canModify = currentRole === 'admin' || currentRole === 'manager';
+  const canModify = canUserModify(currentRole);
   const isEdit = Boolean(combo && combo.id);
 
   const [formData, setFormData] = useState({

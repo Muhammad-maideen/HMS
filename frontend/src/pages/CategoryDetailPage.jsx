@@ -19,7 +19,7 @@ import {
   Share2,
   HelpCircle
 } from 'lucide-react';
-import { api, getRole } from '../services/api';
+import { api, getRole, canUserModify } from '../services/api';
 import { useToast } from '../context/ToastContext';
 
 export default function CategoryDetailPage({ 
@@ -29,7 +29,7 @@ export default function CategoryDetailPage({
 }) {
   const { addToast } = useToast();
   const currentRole = getRole();
-  const canModify = currentRole === 'admin' || currentRole === 'manager';
+  const canModify = canUserModify(currentRole);
   const isEdit = Boolean(category && category.id);
 
   const [formData, setFormData] = useState({

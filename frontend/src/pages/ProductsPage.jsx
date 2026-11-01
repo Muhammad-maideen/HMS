@@ -16,14 +16,14 @@ import {
   Upload,
   Download
 } from 'lucide-react';
-import { api, getRole } from '../services/api';
+import { api, getRole, canUserModify } from '../services/api';
 import { useToast } from '../context/ToastContext';
 import ConfirmationModal from '../components/ConfirmationModal';
 
 export default function ProductsPage({ onEditProduct, onOpenNewProduct, categories = [], refreshTrigger }) {
   const { addToast } = useToast();
   const currentRole = getRole();
-  const canModify = currentRole === 'admin' || currentRole === 'manager';
+  const canModify = canUserModify(currentRole);
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);

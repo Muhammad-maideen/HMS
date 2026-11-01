@@ -24,7 +24,7 @@ import {
   Store,
   Share2
 } from 'lucide-react';
-import { api, getRole } from '../services/api';
+import { api, getRole, canUserModify } from '../services/api';
 import { useToast } from '../context/ToastContext';
 
 export default function ProductDetailPage({ 
@@ -35,7 +35,7 @@ export default function ProductDetailPage({
 }) {
   const { addToast } = useToast();
   const currentRole = getRole();
-  const canModify = currentRole === 'admin' || currentRole === 'manager';
+  const canModify = canUserModify(currentRole);
   const isEdit = Boolean(product && product.id);
 
   const [formData, setFormData] = useState({
@@ -142,6 +142,18 @@ export default function ProductDetailPage({
     setSelectedFile(null);
   }, [product, categories]);
 
+  // Ensure default category is selected when categories arrive
+  useEffect(() => {
+    if (!product && !formData.category_id && categories.length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        category_id: categories[0].id,
+        collections: categories[0].name,
+        product_type: categories[0].name,
+      }));
+    }
+  }, [categories, product, formData.category_id]);
+
   // Pricing computations
   const basePriceNum = parseFloat(formData.base_price) || 0;
   const offerPriceNum = parseFloat(formData.offer_price) || 0;
@@ -224,22 +236,22 @@ export default function ProductDetailPage({
 
       const payload = {
         name: formData.name.trim(),
-        category_id: formData.category_id,
-        sku: formData.sku,
-        description: formData.description,
+        category_id: parseInt(formData.category_id, 10) || formData.category_id,
+        sku: formData.sku?.trim() || undefined,
+        description: formData.description?.trim() || null,
         base_price: parseFloat(formData.base_price),
         offer_price: formData.offer_price ? parseFloat(formData.offer_price) : null,
         dine_in_price: formData.dine_in_price ? parseFloat(formData.dine_in_price) : null,
         takeaway_price: formData.takeaway_price ? parseFloat(formData.takeaway_price) : null,
         delivery_price: formData.delivery_price ? parseFloat(formData.delivery_price) : null,
-        is_featured: formData.is_featured,
-        is_bestseller: formData.is_bestseller,
-        is_new_arrival: formData.is_new_arrival,
-        is_todays_special: formData.is_todays_special,
+        is_featured: Boolean(formData.is_featured),
+        is_bestseller: Boolean(formData.is_bestseller),
+        is_new_arrival: Boolean(formData.is_new_arrival),
+        is_todays_special: Boolean(formData.is_todays_special),
         is_active: formData.status === 'active',
         is_available: formData.status === 'active',
-        stock_quantity: parseInt(formData.stock_quantity) || 0,
-        image_url: formData.image_url,
+        stock_quantity: parseInt(formData.stock_quantity, 10) || 0,
+        image_url: formData.image_url?.trim() || null,
         variants: formData.variants.filter(v => v.variant_name && v.variant_name.trim() !== '')
       };
 

@@ -302,7 +302,7 @@ export default function TopNavbar({
                   {userName}
                 </div>
                 <div className="text-[10px] text-neutral-400 dark:text-neutral-500 font-medium capitalize">
-                  {currentRole === 'admin' ? 'Administrator' : currentRole}
+                  {currentRole === 'super_admin' ? 'Super Administrator' : (currentRole === 'admin' ? 'Administrator' : currentRole)}
                 </div>
               </div>
 

@@ -34,7 +34,15 @@ class CategoryController extends Controller
             'sort_order' => 'integer',
         ]);
 
-        $validated['slug'] = Str::slug($validated['name']);
+        $validated['is_active'] = $request->has('is_active') ? $request->boolean('is_active') : true;
+        $validated['sort_order'] = $request->input('sort_order', 1);
+
+        $slug = Str::slug($validated['name']);
+        if (Category::where('slug', $slug)->exists()) {
+            $slug .= '-' . Str::random(4);
+        }
+        $validated['slug'] = $slug;
+
         $category = Category::create($validated);
 
         return response()->json([

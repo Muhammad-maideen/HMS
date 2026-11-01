@@ -9,7 +9,37 @@ export const setRole = (role) => {
 
 export const getRole = () => currentRole;
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
+export const canUserModify = (role = currentRole) => {
+  const r = (role || '').toLowerCase().trim();
+  return (
+    r === 'admin' ||
+    r === 'super_admin' ||
+    r === 'manager' ||
+    r === 'owner' ||
+    r === 'muhammad' ||
+    r === 'maideen'
+  );
+};
+
+// Automatically determine backend API Base
+const getApiBase = () => {
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL.replace(/\/+$/, '');
+  }
+
+  // When deployed to production host (e.g. Vercel or custom domain)
+  if (
+    typeof window !== 'undefined' &&
+    window.location.hostname !== 'localhost' &&
+    window.location.hostname !== '127.0.0.1'
+  ) {
+    return 'https://hms-03yd.onrender.com/api';
+  }
+
+  return '/api';
+};
+
+export const API_BASE = getApiBase();
 
 async function request(endpoint, options = {}) {
   const headers = {
@@ -27,7 +57,22 @@ async function request(endpoint, options = {}) {
     headers,
   });
 
-  const data = await response.json().catch(() => ({}));
+  const contentType = response.headers.get('content-type') || '';
+  let data = {};
+
+  if (contentType.includes('application/json')) {
+    data = await response.json().catch(() => ({}));
+  } else {
+    const text = await response.text().catch(() => '');
+    if (text.includes('<!doctype html') || text.includes('<html')) {
+      throw new Error(`API endpoint '${endpoint}' returned HTML instead of JSON. Ensure the backend API server is online.`);
+    }
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = {};
+    }
+  }
 
   if (!response.ok) {
     const errorMsg = data.message || `Request failed with status ${response.status}`;

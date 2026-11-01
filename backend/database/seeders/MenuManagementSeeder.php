@@ -19,6 +19,10 @@ class MenuManagementSeeder extends Seeder
 {
     public function run(): void
     {
+        if (Category::count() > 0) {
+            return;
+        }
+
         // 1. Categories
         $categoriesData = [
             [

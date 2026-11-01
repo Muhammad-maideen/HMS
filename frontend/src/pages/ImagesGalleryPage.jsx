@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Images, Upload, Star, Trash2, Eye } from 'lucide-react';
-import { api, getRole } from '../services/api';
+import { api, getRole, canUserModify } from '../services/api';
 import { useToast } from '../context/ToastContext';
 
 export default function ImagesGalleryPage({ products = [] }) {
   const { addToast } = useToast();
   const currentRole = getRole();
-  const canModify = currentRole === 'admin' || currentRole === 'manager';
+  const canModify = canUserModify(currentRole);
 
   const [selectedProductId, setSelectedProductId] = useState(products[0]?.id || '');
   const [images, setImages] = useState([]);

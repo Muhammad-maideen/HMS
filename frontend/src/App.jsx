@@ -237,6 +237,7 @@ function MainLayout({ onLogout }) {
                 onEditCategory={handleEditCategory}
                 onOpenNewCategory={handleOpenNewCategory}
                 onCategoryUpdated={triggerRefresh}
+                refreshTrigger={refreshTrigger}
               />
             )
           )}

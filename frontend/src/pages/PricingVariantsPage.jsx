@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { DollarSign, Save, Sparkles, RefreshCw, Plus, Trash2 } from 'lucide-react';
-import { api, getRole } from '../services/api';
+import { api, getRole, canUserModify } from '../services/api';
 import { useToast } from '../context/ToastContext';
 
 export default function PricingVariantsPage({ refreshTrigger }) {
   const { addToast } = useToast();
   const currentRole = getRole();
-  const canModify = currentRole === 'admin' || currentRole === 'manager';
+  const canModify = canUserModify(currentRole);
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);

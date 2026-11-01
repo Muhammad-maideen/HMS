@@ -94,6 +94,10 @@ class ProductController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+        if (empty($request->input('sku'))) {
+            $request->merge(['sku' => null]);
+        }
+
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
             'name' => 'required|string|max:150',
@@ -131,7 +135,11 @@ class ProductController extends Controller
             $validated['slug'] = $slug;
 
             if (empty($validated['sku'])) {
-                $validated['sku'] = 'AR-' . strtoupper(Str::random(6));
+                $generatedSku = 'AR-' . strtoupper(Str::random(6));
+                while (Product::where('sku', $generatedSku)->exists()) {
+                    $generatedSku = 'AR-' . strtoupper(Str::random(6));
+                }
+                $validated['sku'] = $generatedSku;
             }
 
             // Defaults
@@ -179,6 +187,9 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product): JsonResponse
     {
+        if ($request->has('sku') && empty($request->input('sku'))) {
+            $request->merge(['sku' => null]);
+        }
         $validated = $request->validate([
             'category_id' => 'sometimes|required|exists:categories,id',
             'name' => 'sometimes|required|string|max:150',
