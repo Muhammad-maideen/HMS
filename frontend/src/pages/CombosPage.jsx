@@ -8,9 +8,6 @@ import {
   Sparkles,
   Search,
   RefreshCw,
-  Eye,
-  ChevronDown,
-  Calendar,
   ArrowUpDown,
   Utensils,
   DollarSign
@@ -136,34 +133,18 @@ export default function CombosPage({
         <div className="flex items-center gap-2 flex-wrap">
           <button
             type="button"
-            className="px-3 py-1.5 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold rounded-lg border border-neutral-300 shadow-2xs flex items-center gap-1.5 transition-all"
-          >
-            <Eye className="w-3.5 h-3.5 text-neutral-500" />
-            <span>View as</span>
-          </button>
-
-          <button
-            type="button"
             onClick={fetchCombos}
-            className="px-3 py-1.5 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold rounded-lg border border-neutral-300 shadow-2xs flex items-center gap-1.5 transition-all"
+            className="px-3 py-1.5 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold rounded-lg border border-neutral-300 shadow-2xs flex items-center gap-1.5 transition-all cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             <span>Sync</span>
-          </button>
-
-          <button
-            type="button"
-            className="px-3 py-1.5 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold rounded-lg border border-neutral-300 shadow-2xs flex items-center gap-1 transition-all"
-          >
-            <span>More actions</span>
-            <ChevronDown className="w-3.5 h-3.5 text-neutral-400" />
           </button>
 
           {canModify && (
             <button
               type="button"
               onClick={onOpenNewCombo}
-              className="px-4 py-1.5 bg-black hover:bg-neutral-800 text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-1.5 transition-all"
+              className="px-4 py-1.5 bg-black hover:bg-neutral-800 text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-1.5 transition-all cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
               <span>Add combo</span>
@@ -175,22 +156,26 @@ export default function CombosPage({
       {/* 2. Metrics Summary Bar */}
       <div className="bg-white border border-neutral-200/90 rounded-xl p-4 shadow-2xs grid grid-cols-1 md:grid-cols-4 gap-4 text-xs divide-y md:divide-y-0 md:divide-x divide-neutral-100">
         
-        <div className="flex items-center gap-2 text-neutral-600 md:pr-4">
-          <Calendar className="w-4 h-4 text-neutral-400 shrink-0" />
-          <span className="font-semibold text-neutral-800">30 days</span>
+        <div className="md:pr-4">
+          <div className="text-neutral-500 text-[11px]">
+            Total Combo Deals
+          </div>
+          <div className="font-bold text-neutral-900 text-sm mt-0.5">
+            {combos.length} Combos
+          </div>
         </div>
 
         <div className="pt-2 md:pt-0 md:px-4">
-          <div className="text-neutral-500 text-[11px] underline decoration-dotted decoration-neutral-300">
+          <div className="text-neutral-500 text-[11px]">
             Active Combo Deals
           </div>
-          <div className="font-bold text-neutral-900 text-sm mt-0.5">
+          <div className="font-bold text-emerald-700 text-sm mt-0.5">
             {activeCount} of {combos.length} Live
           </div>
         </div>
 
         <div className="pt-2 md:pt-0 md:px-4">
-          <div className="text-neutral-500 text-[11px] underline decoration-dotted decoration-neutral-300">
+          <div className="text-neutral-500 text-[11px]">
             Avg. Customer Savings
           </div>
           <div className="font-bold text-neutral-900 text-sm mt-0.5">
@@ -199,7 +184,7 @@ export default function CombosPage({
         </div>
 
         <div className="pt-2 md:pt-0 md:pl-4">
-          <div className="text-neutral-500 text-[11px] underline decoration-dotted decoration-neutral-300">
+          <div className="text-neutral-500 text-[11px]">
             Total Menu Portions Bundled
           </div>
           <div className="font-bold text-neutral-900 text-sm mt-0.5">

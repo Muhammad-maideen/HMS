@@ -1,29 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard,
-  TrendingUp, 
   ShoppingBag, 
   ShoppingCart,
-  Users, 
-  CreditCard, 
-  Banknote, 
-  Smartphone, 
-  Clock, 
-  ArrowUpRight, 
-  ArrowDownRight, 
-  AlertTriangle, 
-  Package, 
   Receipt, 
-  ChevronRight, 
-  Printer, 
   RefreshCw,
   Plus,
-  Utensils,
-  CheckCircle2,
-  Calendar,
-  BarChart3,
   Layers,
-  ArrowRight
+  ArrowRight,
+  TrendingUp,
+  AlertTriangle,
+  FolderTree,
+  Banknote
 } from 'lucide-react';
 import { api } from '../services/api';
 import { useToast } from '../context/ToastContext';
@@ -37,7 +25,6 @@ export default function DashboardPage({ onNavigate, onOpenNewProduct }) {
   const [recentOrders, setRecentOrders] = useState([]);
   const [topProducts, setTopProducts] = useState([]);
   const [selectedReceiptOrder, setSelectedReceiptOrder] = useState(null);
-  const [dateFilter, setDateFilter] = useState('today');
 
   // Load Dashboard Data
   const fetchDashboardData = async () => {
@@ -72,25 +59,17 @@ export default function DashboardPage({ onNavigate, onOpenNewProduct }) {
 
   useEffect(() => {
     fetchDashboardData();
-  }, [dateFilter]);
+  }, []);
 
-  // Derived stats with realistic fallbacks if brand new setup
-  const todayRevenue = stats?.today_revenue > 0 ? stats.today_revenue : 1250.00;
-  const todayOrders = stats?.today_orders > 0 ? stats.today_orders : 32;
-  const totalCustomers = Math.max(stats?.today_orders || 0, 28);
-  const totalDue = stats?.out_of_stock_count ? stats.out_of_stock_count * 40 : 320.50;
-  const averageOrderValue = todayOrders > 0 ? (todayRevenue / todayOrders).toFixed(2) : '39.06';
-
-  // Hourly velocity chart bars (10 AM to 10 PM)
-  const hourlyData = [
-    { hour: '10 AM', sales: 120, height: '24%' },
-    { hour: '12 PM', sales: 480, height: '78%' },
-    { hour: '2 PM',  sales: 360, height: '62%' },
-    { hour: '4 PM',  sales: 190, height: '35%' },
-    { hour: '6 PM',  sales: 410, height: '68%' },
-    { hour: '8 PM',  sales: 620, height: '95%' },
-    { hour: '10 PM', sales: 290, height: '48%' },
-  ];
+  // Live real stats from backend API
+  const todayRevenue = stats?.today_revenue ?? 0;
+  const todayOrders = stats?.today_orders ?? 0;
+  const totalRevenue = stats?.total_revenue ?? 0;
+  const totalProducts = stats?.total_products ?? 0;
+  const activeProducts = stats?.active_products ?? 0;
+  const totalCategories = stats?.total_categories ?? 0;
+  const outOfStockCount = stats?.out_of_stock_count ?? 0;
+  const averageOrderValue = todayOrders > 0 ? (todayRevenue / todayOrders).toFixed(2) : '0.00';
 
   return (
     <div className="p-4 sm:p-6 pb-20 space-y-6 max-w-[1600px] mx-auto animate-fadeIn font-sans selection:bg-neutral-900 selection:text-white">
@@ -108,29 +87,11 @@ export default function DashboardPage({ onNavigate, onOpenNewProduct }) {
             </span>
           </div>
           <p className="text-xs text-neutral-500 mt-0.5">
-            Real-time business performance, revenue velocity, and menu metrics
+            Real-time business performance, billing activity, and catalog metrics
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Date range filter tabs */}
-          <div className="bg-neutral-100 p-1 rounded-xl flex items-center gap-1 border border-neutral-200/80">
-            {['today', 'week', 'month'].map(t => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => setDateFilter(t)}
-                className={`px-3 py-1 text-xs font-bold rounded-lg transition-all capitalize cursor-pointer ${
-                  dateFilter === t 
-                    ? 'bg-white text-neutral-900 shadow-2xs' 
-                    : 'text-neutral-500 hover:text-black'
-                }`}
-              >
-                {t === 'today' ? 'Today' : t === 'week' ? 'This Week' : 'This Month'}
-              </button>
-            ))}
-          </div>
-
           <button
             type="button"
             onClick={fetchDashboardData}
@@ -152,7 +113,7 @@ export default function DashboardPage({ onNavigate, onOpenNewProduct }) {
       </div>
 
       {/* ----------------------------------------------------
-          ROW 1: 4 TOP KPI CARDS (Matching RestoDash Layout)
+          ROW 1: 4 TOP KPI CARDS (Real backend data)
           ---------------------------------------------------- */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Today's Sales */}
@@ -162,26 +123,24 @@ export default function DashboardPage({ onNavigate, onOpenNewProduct }) {
             <div className="text-xl sm:text-2xl font-black text-neutral-900 mt-1 font-mono tracking-tight">
               ₹{todayRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
-            <div className="flex items-center gap-1 mt-1 text-[11px] font-semibold text-neutral-800">
-              <span className="text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded-full font-bold">▲ 12.5%</span>
-              <span className="text-neutral-400">vs yesterday</span>
+            <div className="text-[11px] font-medium text-neutral-400 mt-1">
+              Paid counter collections today
             </div>
           </div>
           <div className="w-10 h-10 rounded-xl bg-neutral-100 flex items-center justify-center text-neutral-900 shrink-0">
-            <ShoppingBag className="w-5 h-5 stroke-[2.2]" />
+            <Banknote className="w-5 h-5 stroke-[2.2]" />
           </div>
         </div>
 
-        {/* Card 2: Total Orders */}
+        {/* Card 2: Today's Orders */}
         <div className="bg-white rounded-2xl p-4 sm:p-5 border border-neutral-200/80 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-md transition-all flex items-start justify-between">
           <div>
-            <span className="text-xs font-semibold text-neutral-500 block">Total Orders</span>
+            <span className="text-xs font-semibold text-neutral-500 block">Today's Invoices</span>
             <div className="text-xl sm:text-2xl font-black text-neutral-900 mt-1 font-mono tracking-tight">
               {todayOrders}
             </div>
-            <div className="flex items-center gap-1 mt-1 text-[11px] font-semibold text-neutral-800">
-              <span className="text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded-full font-bold">▲ 8</span>
-              <span className="text-neutral-400">from yesterday</span>
+            <div className="text-[11px] font-medium text-neutral-400 mt-1">
+              Completed checkout tickets
             </div>
           </div>
           <div className="w-10 h-10 rounded-xl bg-neutral-100 flex items-center justify-center text-neutral-900 shrink-0">
@@ -189,179 +148,74 @@ export default function DashboardPage({ onNavigate, onOpenNewProduct }) {
           </div>
         </div>
 
-        {/* Card 3: Customers */}
+        {/* Card 3: All-Time Sales */}
         <div className="bg-white rounded-2xl p-4 sm:p-5 border border-neutral-200/80 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-md transition-all flex items-start justify-between">
           <div>
-            <span className="text-xs font-semibold text-neutral-500 block">Customers</span>
+            <span className="text-xs font-semibold text-neutral-500 block">All-Time Revenue</span>
             <div className="text-xl sm:text-2xl font-black text-neutral-900 mt-1 font-mono tracking-tight">
-              {totalCustomers}
+              ₹{totalRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
-            <div className="flex items-center gap-1 mt-1 text-[11px] font-semibold text-neutral-800">
-              <span className="text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded-full font-bold">▲ 5</span>
-              <span className="text-neutral-400">new guests</span>
+            <div className="text-[11px] font-medium text-neutral-400 mt-1">
+              Total historical sales collected
             </div>
           </div>
           <div className="w-10 h-10 rounded-xl bg-neutral-100 flex items-center justify-center text-neutral-900 shrink-0">
-            <Users className="w-5 h-5 stroke-[2.2]" />
+            <TrendingUp className="w-5 h-5 stroke-[2.2]" />
           </div>
         </div>
 
-        {/* Card 4: Total Due */}
+        {/* Card 4: Catalog Dishes */}
         <div className="bg-white rounded-2xl p-4 sm:p-5 border border-neutral-200/80 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-md transition-all flex items-start justify-between">
           <div>
-            <span className="text-xs font-semibold text-neutral-500 block">Total Due</span>
+            <span className="text-xs font-semibold text-neutral-500 block">Catalog Menu Items</span>
             <div className="text-xl sm:text-2xl font-black text-neutral-900 mt-1 font-mono tracking-tight">
-              ₹{totalDue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {totalProducts}
             </div>
-            <div className="flex items-center gap-1 mt-1 text-[11px] font-semibold text-neutral-800">
-              <span className="text-neutral-600 bg-neutral-100 px-1.5 py-0.2 rounded-full font-bold">▼ 4.2%</span>
-              <span className="text-neutral-400">vs yesterday</span>
+            <div className="text-[11px] font-medium text-neutral-400 mt-1">
+              {activeProducts} active • {outOfStockCount} out of stock
             </div>
           </div>
           <div className="w-10 h-10 rounded-xl bg-neutral-100 flex items-center justify-center text-neutral-900 shrink-0">
-            <Banknote className="w-5 h-5 stroke-[2.2]" />
+            <ShoppingBag className="w-5 h-5 stroke-[2.2]" />
           </div>
         </div>
       </div>
 
       {/* ----------------------------------------------------
-          ROW 2: HOURLY SALES VELOCITY + PAYMENT & CHANNEL CHANNELS
+          ROW 2: OPERATIONAL SUMMARY STRIP
           ---------------------------------------------------- */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
-        {/* Hourly Sales Bar Graph (8 Cols) */}
-        <div className="lg:col-span-8 bg-white rounded-2xl p-5 border border-neutral-200/80 shadow-[0_2px_8px_rgba(0,0,0,0.03)] space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-bold text-neutral-900">Today's Hourly Revenue Velocity</h3>
-              <p className="text-xs text-neutral-400 mt-0.5">Order volume peaks during lunch (12 PM - 2 PM) and dinner (7 PM - 9 PM)</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-100 text-[11px] font-mono font-bold text-neutral-800">
-                Avg Ticket: ₹{averageOrderValue}
-              </span>
-            </div>
-          </div>
-
-          {/* Visual Bar Chart in Monochrome Luxury Aesthetic */}
-          <div className="pt-6 pb-2">
-            <div className="h-44 flex items-end justify-between gap-3 px-2 border-b border-neutral-100">
-              {hourlyData.map((d, i) => (
-                <div key={i} className="flex-1 flex flex-col items-center gap-2 group relative h-full justify-end">
-                  {/* Tooltip on hover */}
-                  <div className="absolute -top-7 opacity-0 group-hover:opacity-100 transition-opacity bg-neutral-900 text-white text-[10px] font-mono font-bold px-2 py-0.5 rounded-md pointer-events-none whitespace-nowrap shadow-md">
-                    ₹{d.sales}
-                  </div>
-
-                  {/* Bar */}
-                  <div 
-                    style={{ height: d.height }}
-                    className="w-full max-w-[42px] bg-neutral-900 hover:bg-neutral-700 rounded-t-xl transition-all duration-300 group-hover:scale-102"
-                  />
-
-                  {/* Label */}
-                  <span className="text-[10px] font-bold text-neutral-400 mt-2 block">
-                    {d.hour}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Bottom stats summary */}
-          <div className="grid grid-cols-3 gap-3 pt-2 text-center divide-x divide-neutral-100">
-            <div>
-              <span className="text-[11px] text-neutral-400 block font-medium">Peak Hour</span>
-              <span className="text-sm font-bold text-neutral-900 font-mono">8:00 PM</span>
-            </div>
-            <div>
-              <span className="text-[11px] text-neutral-400 block font-medium">Fastest Punch Time</span>
-              <span className="text-sm font-bold text-neutral-900 font-mono">4.2s / ticket</span>
-            </div>
-            <div>
-              <span className="text-[11px] text-neutral-400 block font-medium">Active Dining Tables</span>
-              <span className="text-sm font-bold text-neutral-900 font-mono">8 / 12 occupied</span>
-            </div>
-          </div>
+      <div className="bg-white rounded-2xl p-4 border border-neutral-200/80 shadow-2xs grid grid-cols-2 md:grid-cols-4 gap-4 text-xs divide-y md:divide-y-0 md:divide-x divide-neutral-100">
+        <div className="md:pr-4">
+          <span className="text-neutral-400 font-medium block">Average Ticket Size</span>
+          <span className="text-sm font-bold text-neutral-900 font-mono mt-0.5 block">
+            ₹{averageOrderValue}
+          </span>
         </div>
 
-        {/* Payment Channels & Order Types (4 Cols) */}
-        <div className="lg:col-span-4 bg-white rounded-2xl p-5 border border-neutral-200/80 shadow-[0_2px_8px_rgba(0,0,0,0.03)] space-y-4 flex flex-col justify-between">
-          <div>
-            <h3 className="text-sm font-bold text-neutral-900">Payment Breakdown</h3>
-            <p className="text-xs text-neutral-400 mt-0.5">Distribution across collection modes</p>
-          </div>
-
-          <div className="space-y-3">
-            {/* Cash */}
-            <div className="space-y-1">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-neutral-700 flex items-center gap-1.5">
-                  <Banknote className="w-3.5 h-3.5 text-neutral-500" />
-                  <span>Cash Register</span>
-                </span>
-                <span className="font-mono font-bold text-neutral-900">45% • ₹{(todayRevenue * 0.45).toFixed(0)}</span>
-              </div>
-              <div className="w-full h-2 bg-neutral-100 rounded-full overflow-hidden">
-                <div className="h-full bg-neutral-900 rounded-full" style={{ width: '45%' }} />
-              </div>
-            </div>
-
-            {/* UPI */}
-            <div className="space-y-1">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-neutral-700 flex items-center gap-1.5">
-                  <Smartphone className="w-3.5 h-3.5 text-neutral-500" />
-                  <span>Dynamic UPI / QR</span>
-                </span>
-                <span className="font-mono font-bold text-neutral-900">42% • ₹{(todayRevenue * 0.42).toFixed(0)}</span>
-              </div>
-              <div className="w-full h-2 bg-neutral-100 rounded-full overflow-hidden">
-                <div className="h-full bg-neutral-800 rounded-full" style={{ width: '42%' }} />
-              </div>
-            </div>
-
-            {/* Card */}
-            <div className="space-y-1">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-neutral-700 flex items-center gap-1.5">
-                  <CreditCard className="w-3.5 h-3.5 text-neutral-500" />
-                  <span>POS Card Swipe</span>
-                </span>
-                <span className="font-mono font-bold text-neutral-900">13% • ₹{(todayRevenue * 0.13).toFixed(0)}</span>
-              </div>
-              <div className="w-full h-2 bg-neutral-100 rounded-full overflow-hidden">
-                <div className="h-full bg-neutral-600 rounded-full" style={{ width: '13%' }} />
-              </div>
-            </div>
-          </div>
-
-          {/* Order types badge strip */}
-          <div className="pt-3 border-t border-neutral-100">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 block mb-2">
-              Dining Mode Share:
-            </span>
-            <div className="grid grid-cols-3 gap-1.5 text-center text-xs">
-              <div className="p-2 bg-neutral-50 rounded-xl border border-neutral-200/80">
-                <span className="text-[10px] text-neutral-500 block">Dine-In</span>
-                <span className="font-bold text-neutral-900 font-mono">60%</span>
-              </div>
-              <div className="p-2 bg-neutral-50 rounded-xl border border-neutral-200/80">
-                <span className="text-[10px] text-neutral-500 block">Takeaway</span>
-                <span className="font-bold text-neutral-900 font-mono">25%</span>
-              </div>
-              <div className="p-2 bg-neutral-50 rounded-xl border border-neutral-200/80">
-                <span className="text-[10px] text-neutral-500 block">Delivery</span>
-                <span className="font-bold text-neutral-900 font-mono">15%</span>
-              </div>
-            </div>
-          </div>
+        <div className="pt-2 md:pt-0 md:px-4">
+          <span className="text-neutral-400 font-medium block">Active Menu Sections</span>
+          <span className="text-sm font-bold text-neutral-900 font-mono mt-0.5 block">
+            {totalCategories} Categories
+          </span>
         </div>
 
+        <div className="pt-2 md:pt-0 md:px-4">
+          <span className="text-neutral-400 font-medium block">Active Dishes</span>
+          <span className="text-sm font-bold text-emerald-700 font-mono mt-0.5 block">
+            {activeProducts} of {totalProducts} Available
+          </span>
+        </div>
+
+        <div className="pt-2 md:pt-0 md:pl-4">
+          <span className="text-neutral-400 font-medium block">Out of Stock Alerts</span>
+          <span className={`text-sm font-bold font-mono mt-0.5 block ${outOfStockCount > 0 ? 'text-amber-600' : 'text-neutral-900'}`}>
+            {outOfStockCount} Items
+          </span>
+        </div>
       </div>
 
       {/* ----------------------------------------------------
-          ROW 3: RECENT ORDERS (6 COLS) + TOP SELLERS (6 COLS)
+          ROW 3: RECENT ORDERS (7 COLS) + TOP SELLERS (5 COLS)
           ---------------------------------------------------- */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         

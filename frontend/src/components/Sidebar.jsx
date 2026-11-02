@@ -10,22 +10,13 @@ import {
   ChevronDown, 
   LogOut, 
   Sparkles,
-  Calendar,
-  Users,
   BarChart3,
   Settings,
-  HelpCircle,
-  Zap,
-  Grid3X3,
-  Keyboard,
   Sun,
   Moon,
   Check,
   QrCode,
-  Pencil,
-  Camera,
-  UserCheck,
-  ShieldCheck
+  Pencil
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import SidebarLogo from './SidebarLogo';

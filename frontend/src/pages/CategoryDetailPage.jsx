@@ -4,20 +4,8 @@ import {
   Trash2, 
   Plus, 
   ChevronDown, 
-  Eye, 
-  Bold, 
-  Italic, 
-  Underline, 
-  AlignLeft, 
-  List, 
-  ListOrdered, 
-  Link2, 
-  Image as ImageIcon, 
-  Code,
   FolderTree,
-  Utensils,
-  Share2,
-  HelpCircle
+  Utensils
 } from 'lucide-react';
 import { api, getRole, canUserModify } from '../services/api';
 import { useToast } from '../context/ToastContext';
@@ -245,34 +233,13 @@ export default function CategoryDetailPage({
                 <label className="block text-xs font-bold text-neutral-900 mb-1.5">
                   Description
                 </label>
-
-                {/* Rich Editor Toolbar */}
-                <div className="border border-neutral-300 rounded-lg overflow-hidden bg-white focus-within:ring-1 focus-within:ring-black focus-within:border-black">
-                  <div className="bg-neutral-50/80 border-b border-neutral-200 px-2 py-1.5 flex flex-wrap items-center gap-1 text-neutral-600 text-xs">
-                    <span className="px-2 py-1 text-xs font-semibold text-neutral-700 bg-white border border-neutral-200 rounded flex items-center gap-1">
-                      Paragraph <ChevronDown className="w-3 h-3" />
-                    </span>
-                    <div className="h-4 w-px bg-neutral-200 mx-1"></div>
-                    <button type="button" className="p-1 hover:bg-neutral-200 rounded" title="Bold"><Bold className="w-3.5 h-3.5" /></button>
-                    <button type="button" className="p-1 hover:bg-neutral-200 rounded" title="Italic"><Italic className="w-3.5 h-3.5" /></button>
-                    <button type="button" className="p-1 hover:bg-neutral-200 rounded" title="Underline"><Underline className="w-3.5 h-3.5" /></button>
-                    <div className="h-4 w-px bg-neutral-200 mx-1"></div>
-                    <button type="button" className="p-1 hover:bg-neutral-200 rounded" title="Align"><AlignLeft className="w-3.5 h-3.5" /></button>
-                    <button type="button" className="p-1 hover:bg-neutral-200 rounded" title="Link"><Link2 className="w-3.5 h-3.5" /></button>
-                    <button type="button" className="p-1 hover:bg-neutral-200 rounded" title="Image"><ImageIcon className="w-3.5 h-3.5" /></button>
-                    <button type="button" className="p-1 hover:bg-neutral-200 rounded" title="Bullet List"><List className="w-3.5 h-3.5" /></button>
-                    <button type="button" className="p-1 hover:bg-neutral-200 rounded" title="Numbered List"><ListOrdered className="w-3.5 h-3.5" /></button>
-                    <button type="button" className="p-1 hover:bg-neutral-200 rounded" title="Code"><Code className="w-3.5 h-3.5" /></button>
-                  </div>
-
-                  <textarea
-                    rows={4}
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Describe culinary notes, cuisine heritage, or dietary focus of this category section..."
-                    className="w-full p-3.5 text-xs text-neutral-900 bg-transparent focus:outline-none resize-y"
-                  />
-                </div>
+                <textarea
+                  rows={4}
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Describe culinary notes, cuisine heritage, or dietary focus of this category section..."
+                  className="w-full p-3.5 text-xs text-neutral-900 bg-white border border-neutral-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-black resize-y"
+                />
               </div>
             </div>
 
@@ -443,56 +410,11 @@ export default function CategoryDetailPage({
               </div>
             </div>
 
-            {/* CARD 2: Publishing */}
-            <div className="bg-white border border-neutral-200/90 rounded-xl p-5 shadow-xs space-y-3">
-              <div className="flex items-center justify-between">
-                <label className="block text-xs font-bold text-neutral-900">
-                  Publishing
-                </label>
-                <Share2 className="w-3.5 h-3.5 text-neutral-400" />
-              </div>
-
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-xs text-neutral-700 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.channel_pos}
-                    onChange={(e) => setFormData({ ...formData, channel_pos: e.target.checked })}
-                    className="w-4 h-4 rounded text-black focus:ring-black"
-                  />
-                  <span>POS Terminal & Cashier</span>
-                </label>
-
-                <label className="flex items-center gap-2 text-xs text-neutral-700 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.channel_dine_in}
-                    onChange={(e) => setFormData({ ...formData, channel_dine_in: e.target.checked })}
-                    className="w-4 h-4 rounded text-black focus:ring-black"
-                  />
-                  <span>Dine-In Digital Menu</span>
-                </label>
-
-                <label className="flex items-center gap-2 text-xs text-neutral-700 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.channel_delivery}
-                    onChange={(e) => setFormData({ ...formData, channel_delivery: e.target.checked })}
-                    className="w-4 h-4 rounded text-black focus:ring-black"
-                  />
-                  <span>Delivery & Takeaway</span>
-                </label>
-              </div>
-            </div>
-
-            {/* CARD 3: Category Organization */}
+            {/* CARD 2: Category Organization */}
             <div className="bg-white border border-neutral-200/90 rounded-xl p-5 shadow-xs space-y-4">
-              <div className="flex items-center gap-1.5">
-                <label className="block text-xs font-bold text-neutral-900">
-                  Category organization
-                </label>
-                <HelpCircle className="w-3 h-3 text-neutral-400" />
-              </div>
+              <label className="block text-xs font-bold text-neutral-900">
+                Category organization
+              </label>
 
               {/* Sort Order */}
               <div>

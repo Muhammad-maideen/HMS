@@ -2,17 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   Menu, 
   Search, 
-  Bell, 
   ChevronDown, 
   Clock, 
-  CheckCircle2, 
-  AlertCircle, 
-  Sparkles, 
   LogOut, 
-  ShieldCheck, 
-  UserCheck, 
-  ShoppingBag, 
-  ChefHat,
   X,
   Pencil,
   Camera
@@ -67,15 +59,6 @@ export default function TopNavbar({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
-
-  // Notifications dropdown
-  const [isNotifOpen, setIsNotifOpen] = useState(false);
-  const notifRef = useRef(null);
-  const [notifications, setNotifications] = useState([
-    { id: 1, title: 'Table 05 order confirmed', time: '5m ago', unread: true },
-    { id: 2, title: 'Kitchen ticket #104 ready', time: '12m ago', unread: true },
-    { id: 3, title: 'Daily shift register opened', time: '1h ago', unread: false },
-  ]);
 
   // Profile / Role state
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -137,9 +120,6 @@ export default function TopNavbar({
   // Close dropdowns on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (notifRef.current && !notifRef.current.contains(event.target)) {
-        setIsNotifOpen(false);
-      }
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setIsProfileOpen(false);
       }
@@ -147,8 +127,6 @@ export default function TopNavbar({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const unreadCount = notifications.filter(n => n.unread).length;
 
   return (
     <header className="sticky top-0 z-30 bg-white/95 dark:bg-[#0a0a0c]/95 backdrop-blur-md border-b border-neutral-200/80 dark:border-neutral-800/80 px-4 lg:px-6 py-2.5 transition-all select-none">
@@ -206,66 +184,9 @@ export default function TopNavbar({
           </div>
         </div>
 
-        {/* Right Tools: Notification Bell, Live Date/Time, User Profile */}
+        {/* Right Tools: Live Date/Time, User Profile */}
         <div className="flex items-center gap-2.5 shrink-0">
           
-          {/* Notification Bell */}
-          <div className="relative" ref={notifRef}>
-            <button
-              type="button"
-              onClick={() => setIsNotifOpen(prev => !prev)}
-              className="relative p-2 rounded-xl text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all cursor-pointer"
-              title="Notifications"
-            >
-              <Bell className="w-4 h-4" />
-              {unreadCount > 0 && (
-                <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-neutral-900 dark:bg-white text-white dark:text-black text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-white dark:border-neutral-900">
-                  {unreadCount}
-                </span>
-              )}
-            </button>
-
-            {/* Notifications Dropdown Modal */}
-            {isNotifOpen && (
-              <div className="absolute right-0 top-full mt-2 w-72 bg-white dark:bg-[#121214] rounded-2xl shadow-xl border border-neutral-200/90 dark:border-neutral-800 py-2 z-50 animate-fadeIn text-neutral-900 dark:text-neutral-100">
-                <div className="px-3.5 py-2 border-b border-neutral-100 dark:border-neutral-800 flex items-center justify-between">
-                  <span className="text-xs font-bold text-neutral-900 dark:text-white">Notifications</span>
-                  <span className="text-[10px] font-medium text-neutral-500 dark:text-neutral-400">{unreadCount} unread</span>
-                </div>
-
-                <div className="divide-y divide-neutral-100 dark:divide-neutral-800 max-h-60 overflow-y-auto">
-                  {notifications.map(n => (
-                    <div 
-                      key={n.id}
-                      onClick={() => {
-                        setNotifications(prev => prev.map(item => item.id === n.id ? { ...item, unread: false } : item));
-                      }}
-                      className={`px-3.5 py-2.5 hover:bg-neutral-50 dark:hover:bg-neutral-800/60 cursor-pointer flex items-start gap-2.5 transition-colors ${n.unread ? 'bg-neutral-50/50 dark:bg-neutral-800/30' : ''}`}
-                    >
-                      <span className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${n.unread ? 'bg-neutral-900 dark:bg-white' : 'bg-neutral-200 dark:bg-neutral-700'}`} />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-neutral-800 dark:text-neutral-200 truncate">{n.title}</p>
-                        <p className="text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5">{n.time}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="px-3 py-1.5 border-t border-neutral-100 dark:border-neutral-800 text-center">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setNotifications(prev => prev.map(item => ({ ...item, unread: false })));
-                      setIsNotifOpen(false);
-                    }}
-                    className="text-[11px] font-semibold text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white cursor-pointer"
-                  >
-                    Mark all as read
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
           {/* Real-time Date & Time Pill (RestoDash style) */}
           <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-50/80 dark:bg-neutral-900/80 border border-neutral-200/60 dark:border-neutral-800/60 text-neutral-700 dark:text-neutral-300">
             <Clock className="w-3.5 h-3.5 text-neutral-400 dark:text-neutral-500" />

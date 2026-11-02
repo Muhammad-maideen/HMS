@@ -4,21 +4,8 @@ import {
   Trash2, 
   Plus, 
   ChevronDown, 
-  Eye, 
-  Bold, 
-  Italic, 
-  Underline, 
-  AlignLeft, 
-  List, 
-  ListOrdered, 
-  Link2, 
-  Image as ImageIcon, 
-  Code,
   Layers,
   Sparkles,
-  HelpCircle,
-  Tag,
-  CheckCircle2,
   DollarSign,
   Utensils
 } from 'lucide-react';
@@ -321,54 +308,17 @@ export default function ComboDetailPage({
                 />
               </div>
 
-              {/* Rich text editor toolbar */}
               <div>
                 <label className="block text-xs font-bold text-neutral-900 mb-1.5">
                   Description
                 </label>
-                <div className="border border-neutral-300 rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-black focus-within:border-black">
-                  
-                  {/* Toolbar */}
-                  <div className="bg-neutral-50 border-b border-neutral-200 px-3 py-2 flex items-center gap-1 flex-wrap text-neutral-600">
-                    <button type="button" className="p-1.5 hover:bg-neutral-200 rounded transition-colors text-neutral-700">
-                      <Bold className="w-3.5 h-3.5" />
-                    </button>
-                    <button type="button" className="p-1.5 hover:bg-neutral-200 rounded transition-colors text-neutral-700">
-                      <Italic className="w-3.5 h-3.5" />
-                    </button>
-                    <button type="button" className="p-1.5 hover:bg-neutral-200 rounded transition-colors text-neutral-700">
-                      <Underline className="w-3.5 h-3.5" />
-                    </button>
-                    <div className="h-4 w-px bg-neutral-300 mx-1"></div>
-                    <button type="button" className="p-1.5 hover:bg-neutral-200 rounded transition-colors text-neutral-700">
-                      <AlignLeft className="w-3.5 h-3.5" />
-                    </button>
-                    <button type="button" className="p-1.5 hover:bg-neutral-200 rounded transition-colors text-neutral-700">
-                      <List className="w-3.5 h-3.5" />
-                    </button>
-                    <button type="button" className="p-1.5 hover:bg-neutral-200 rounded transition-colors text-neutral-700">
-                      <ListOrdered className="w-3.5 h-3.5" />
-                    </button>
-                    <div className="h-4 w-px bg-neutral-300 mx-1"></div>
-                    <button type="button" className="p-1.5 hover:bg-neutral-200 rounded transition-colors text-neutral-700">
-                      <Link2 className="w-3.5 h-3.5" />
-                    </button>
-                    <button type="button" className="p-1.5 hover:bg-neutral-200 rounded transition-colors text-neutral-700">
-                      <ImageIcon className="w-3.5 h-3.5" />
-                    </button>
-                    <button type="button" className="p-1.5 hover:bg-neutral-200 rounded transition-colors text-neutral-700">
-                      <Code className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-
-                  <textarea
-                    rows={4}
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Describe what makes this combo special, bundle contents, portion sizing, and who it's ideal for..."
-                    className="w-full p-3.5 text-xs bg-white focus:outline-none resize-y"
-                  />
-                </div>
+                <textarea
+                  rows={4}
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Describe what makes this combo special, bundle contents, portion sizing, and who it's ideal for..."
+                  className="w-full p-3.5 text-xs text-neutral-900 bg-white border border-neutral-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-black resize-y"
+                />
               </div>
 
               {/* Promotional Badge */}
@@ -774,79 +724,6 @@ export default function ComboDetailPage({
                   </span>
                 </div>
               </div>
-            </div>
-
-            {/* CARD 3: Publishing Channels */}
-            <div className="bg-white border border-neutral-200/90 rounded-xl p-5 shadow-xs space-y-3">
-              <h3 className="text-xs font-bold text-neutral-900">Publishing Channels</h3>
-              <p className="text-[11px] text-neutral-500">Select where this combo meal can be ordered</p>
-
-              <div className="space-y-2 pt-1 text-xs">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.channel_pos}
-                    onChange={(e) => setFormData({ ...formData, channel_pos: e.target.checked })}
-                    className="w-3.5 h-3.5 rounded text-black focus:ring-black"
-                  />
-                  <span className="font-semibold text-neutral-800">Point of Sale (POS Terminal)</span>
-                </label>
-
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.channel_dine_in}
-                    onChange={(e) => setFormData({ ...formData, channel_dine_in: e.target.checked })}
-                    className="w-3.5 h-3.5 rounded text-black focus:ring-black"
-                  />
-                  <span className="text-neutral-700">Dine-In QR Menu</span>
-                </label>
-
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.channel_delivery}
-                    onChange={(e) => setFormData({ ...formData, channel_delivery: e.target.checked })}
-                    className="w-3.5 h-3.5 rounded text-black focus:ring-black"
-                  />
-                  <span className="text-neutral-700">Online Delivery Channels</span>
-                </label>
-              </div>
-            </div>
-
-            {/* CARD 4: Organization & Details */}
-            <div className="bg-white border border-neutral-200/90 rounded-xl p-5 shadow-xs space-y-3">
-              <h3 className="text-xs font-bold text-neutral-900">Meal Organization</h3>
-
-              <div>
-                <label className="block text-[11px] font-semibold text-neutral-700 mb-1">
-                  Serving Size
-                </label>
-                <select
-                  value={formData.serving_size}
-                  onChange={(e) => setFormData({ ...formData, serving_size: e.target.value })}
-                  className="w-full px-3 py-1.5 text-xs bg-white border border-neutral-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-black"
-                >
-                  <option value="Single Meal (1 Person)">Single Meal (1 Person)</option>
-                  <option value="Feeds 1-2 Persons">Feeds 1-2 Persons</option>
-                  <option value="Family Feast (3-4 Persons)">Family Feast (3-4 Persons)</option>
-                  <option value="Party Platter (5+ Persons)">Party Platter (5+ Persons)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold text-neutral-700 mb-1">
-                  Kitchen Station
-                </label>
-                <input
-                  type="text"
-                  value={formData.kitchen_station}
-                  onChange={(e) => setFormData({ ...formData, kitchen_station: e.target.value })}
-                  placeholder="Main Kitchen, Tandoor, Beverage Bar"
-                  className="w-full px-3 py-1.5 text-xs bg-white border border-neutral-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-black"
-                />
-              </div>
-
             </div>
 
           </div>

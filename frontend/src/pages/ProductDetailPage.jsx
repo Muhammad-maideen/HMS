@@ -5,24 +5,11 @@ import {
   Trash2, 
   Plus, 
   Check, 
-  HelpCircle, 
   ChevronDown, 
-  Eye, 
   Sparkles,
-  Bold, 
-  Italic, 
-  Underline, 
-  AlignLeft, 
-  AlignCenter, 
-  List, 
-  ListOrdered, 
-  Link2, 
-  Image as ImageIcon, 
-  Code,
   DollarSign,
   Layers,
-  Store,
-  Share2
+  Store
 } from 'lucide-react';
 import { api, getRole, canUserModify } from '../services/api';
 import { useToast } from '../context/ToastContext';
@@ -364,34 +351,13 @@ export default function ProductDetailPage({
                 <label className="block text-xs font-bold text-neutral-900 mb-1.5">
                   Description
                 </label>
-
-                {/* Rich Editor Toolbar Mockup (matching screenshot 2) */}
-                <div className="border border-neutral-300 rounded-lg overflow-hidden bg-white focus-within:ring-1 focus-within:ring-black focus-within:border-black">
-                  <div className="bg-neutral-50/80 border-b border-neutral-200 px-2 py-1.5 flex flex-wrap items-center gap-1 text-neutral-600 text-xs">
-                    <span className="px-2 py-1 text-xs font-semibold text-neutral-700 bg-white border border-neutral-200 rounded flex items-center gap-1">
-                      Paragraph <ChevronDown className="w-3 h-3" />
-                    </span>
-                    <div className="h-4 w-px bg-neutral-200 mx-1"></div>
-                    <button type="button" className="p-1 hover:bg-neutral-200 rounded" title="Bold"><Bold className="w-3.5 h-3.5" /></button>
-                    <button type="button" className="p-1 hover:bg-neutral-200 rounded" title="Italic"><Italic className="w-3.5 h-3.5" /></button>
-                    <button type="button" className="p-1 hover:bg-neutral-200 rounded" title="Underline"><Underline className="w-3.5 h-3.5" /></button>
-                    <div className="h-4 w-px bg-neutral-200 mx-1"></div>
-                    <button type="button" className="p-1 hover:bg-neutral-200 rounded" title="Align"><AlignLeft className="w-3.5 h-3.5" /></button>
-                    <button type="button" className="p-1 hover:bg-neutral-200 rounded" title="Link"><Link2 className="w-3.5 h-3.5" /></button>
-                    <button type="button" className="p-1 hover:bg-neutral-200 rounded" title="Image"><ImageIcon className="w-3.5 h-3.5" /></button>
-                    <button type="button" className="p-1 hover:bg-neutral-200 rounded" title="Bullet List"><List className="w-3.5 h-3.5" /></button>
-                    <button type="button" className="p-1 hover:bg-neutral-200 rounded" title="Numbered List"><ListOrdered className="w-3.5 h-3.5" /></button>
-                    <button type="button" className="p-1 hover:bg-neutral-200 rounded" title="Code"><Code className="w-3.5 h-3.5" /></button>
-                  </div>
-
-                  <textarea
-                    rows={5}
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Describe flavor notes, ingredients, dietary details, allergens and preparation method..."
-                    className="w-full p-3.5 text-xs text-neutral-900 bg-transparent focus:outline-none resize-y"
-                  />
-                </div>
+                <textarea
+                  rows={4}
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Describe flavor notes, ingredients, dietary details, allergens and preparation method..."
+                  className="w-full p-3.5 text-xs text-neutral-900 bg-white border border-neutral-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-black resize-y"
+                />
               </div>
             </div>
 
@@ -751,152 +717,54 @@ export default function ProductDetailPage({
             </div>
 
             {/* CARD 2: Publishing (Matching screenshot 2) */}
+            {/* CARD 2: Marketing Badges */}
             <div className="bg-white border border-neutral-200/90 rounded-xl p-5 shadow-xs space-y-3">
-              <div className="flex items-center justify-between">
-                <label className="block text-xs font-bold text-neutral-900">
-                  Publishing
-                </label>
-                <Share2 className="w-3.5 h-3.5 text-neutral-400" />
-              </div>
+              <label className="block text-xs font-bold text-neutral-900 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-neutral-800" />
+                Marketing Badges
+              </label>
 
               <div className="space-y-2">
                 <label className="flex items-center gap-2 text-xs text-neutral-700 cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={formData.channel_pos}
-                    onChange={(e) => setFormData({ ...formData, channel_pos: e.target.checked })}
-                    className="w-4 h-4 rounded text-black focus:ring-black"
+                    checked={formData.is_featured}
+                    onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
+                    className="w-3.5 h-3.5 rounded text-black focus:ring-black"
                   />
-                  <span>POS Terminal & Cashier</span>
+                  <span>Featured Dish</span>
                 </label>
 
                 <label className="flex items-center gap-2 text-xs text-neutral-700 cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={formData.channel_dine_in}
-                    onChange={(e) => setFormData({ ...formData, channel_dine_in: e.target.checked })}
-                    className="w-4 h-4 rounded text-black focus:ring-black"
+                    checked={formData.is_bestseller}
+                    onChange={(e) => setFormData({ ...formData, is_bestseller: e.target.checked })}
+                    className="w-3.5 h-3.5 rounded text-black focus:ring-black"
                   />
-                  <span>Dine-In Digital Menu</span>
+                  <span>Bestseller</span>
                 </label>
 
                 <label className="flex items-center gap-2 text-xs text-neutral-700 cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={formData.channel_delivery}
-                    onChange={(e) => setFormData({ ...formData, channel_delivery: e.target.checked })}
-                    className="w-4 h-4 rounded text-black focus:ring-black"
+                    checked={formData.is_todays_special}
+                    onChange={(e) => setFormData({ ...formData, is_todays_special: e.target.checked })}
+                    className="w-3.5 h-3.5 rounded text-black focus:ring-black"
                   />
-                  <span>Delivery & Takeaway</span>
-                </label>
-              </div>
-            </div>
-
-            {/* CARD 3: Product organization (Matching screenshot 2) */}
-            <div className="bg-white border border-neutral-200/90 rounded-xl p-5 shadow-xs space-y-4">
-              <div className="flex items-center gap-1.5">
-                <label className="block text-xs font-bold text-neutral-900">
-                  Product organization
-                </label>
-                <HelpCircle className="w-3 h-3 text-neutral-400" />
-              </div>
-
-              {/* Type */}
-              <div>
-                <label className="block text-[11px] font-semibold text-neutral-700 mb-1">
-                  Type
-                </label>
-                <input
-                  type="text"
-                  value={formData.product_type}
-                  onChange={(e) => setFormData({ ...formData, product_type: e.target.value })}
-                  placeholder="e.g. Main Course, Appetizer"
-                  className="w-full px-3 py-1.5 text-xs bg-white border border-neutral-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-black"
-                />
-              </div>
-
-              {/* Collections */}
-              <div>
-                <label className="block text-[11px] font-semibold text-neutral-700 mb-1">
-                  Collections
-                </label>
-                <input
-                  type="text"
-                  value={formData.collections}
-                  onChange={(e) => setFormData({ ...formData, collections: e.target.value })}
-                  placeholder="e.g. Lunch Specials, Biryani Festival"
-                  className="w-full px-3 py-1.5 text-xs bg-white border border-neutral-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-black"
-                />
-              </div>
-
-              {/* Promotional Badges / Tags */}
-              <div>
-                <label className="block text-[11px] font-semibold text-neutral-700 mb-1.5">
-                  Marketing Badges
+                  <span>Today's Special</span>
                 </label>
 
-                <div className="space-y-1.5">
-                  <label className="flex items-center gap-2 text-xs text-neutral-700 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formData.is_featured}
-                      onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
-                      className="w-3.5 h-3.5 rounded text-black focus:ring-black"
-                    />
-                    <span>Featured Dish</span>
-                  </label>
-
-                  <label className="flex items-center gap-2 text-xs text-neutral-700 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formData.is_bestseller}
-                      onChange={(e) => setFormData({ ...formData, is_bestseller: e.target.checked })}
-                      className="w-3.5 h-3.5 rounded text-black focus:ring-black"
-                    />
-                    <span>Bestseller</span>
-                  </label>
-
-                  <label className="flex items-center gap-2 text-xs text-neutral-700 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formData.is_todays_special}
-                      onChange={(e) => setFormData({ ...formData, is_todays_special: e.target.checked })}
-                      className="w-3.5 h-3.5 rounded text-black focus:ring-black"
-                    />
-                    <span>Today's Special</span>
-                  </label>
-
-                  <label className="flex items-center gap-2 text-xs text-neutral-700 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formData.is_new_arrival}
-                      onChange={(e) => setFormData({ ...formData, is_new_arrival: e.target.checked })}
-                      className="w-3.5 h-3.5 rounded text-black focus:ring-black"
-                    />
-                    <span>New Arrival</span>
-                  </label>
-                </div>
-              </div>
-
-              {/* Theme Template */}
-              <div>
-                <label className="block text-[11px] font-semibold text-neutral-700 mb-1">
-                  Theme template
+                <label className="flex items-center gap-2 text-xs text-neutral-700 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.is_new_arrival}
+                    onChange={(e) => setFormData({ ...formData, is_new_arrival: e.target.checked })}
+                    className="w-3.5 h-3.5 rounded text-black focus:ring-black"
+                  />
+                  <span>New Arrival</span>
                 </label>
-                <div className="relative">
-                  <select
-                    value={formData.theme_template}
-                    onChange={(e) => setFormData({ ...formData, theme_template: e.target.value })}
-                    className="w-full px-3 py-1.5 text-xs bg-white border border-neutral-300 rounded-lg appearance-none font-medium text-neutral-800"
-                  >
-                    <option value="Default product">Default product</option>
-                    <option value="Special combo template">Special combo template</option>
-                    <option value="Beverage template">Beverage template</option>
-                  </select>
-                  <ChevronDown className="w-3.5 h-3.5 text-neutral-400 absolute right-2.5 top-2 pointer-events-none" />
-                </div>
               </div>
-
             </div>
 
           </div>
