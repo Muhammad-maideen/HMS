@@ -5,12 +5,14 @@ import {
   Trash2, 
   ChevronLeft, 
   ChevronRight,
+  ChevronDown,
   RefreshCw,
   ShoppingBag,
   ArrowUpDown,
   Filter,
   MoreHorizontal,
-  Upload
+  Upload,
+  Eye
 } from 'lucide-react';
 import { api, getRole, canUserModify } from '../services/api';
 import { useToast } from '../context/ToastContext';

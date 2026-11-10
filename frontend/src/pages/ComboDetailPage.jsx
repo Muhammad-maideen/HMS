@@ -7,7 +7,8 @@ import {
   Layers,
   Sparkles,
   DollarSign,
-  Utensils
+  Utensils,
+  Image as ImageIcon
 } from 'lucide-react';
 import { api, getRole, canUserModify } from '../services/api';
 import { useToast } from '../context/ToastContext';

@@ -5,7 +5,9 @@ import {
   Trash2, 
   FolderTree, 
   RefreshCw, 
-  ArrowUpDown
+  ArrowUpDown,
+  Layers,
+  Eye
 } from 'lucide-react';
 import { api, getRole, canUserModify } from '../services/api';
 import { useToast } from '../context/ToastContext';
